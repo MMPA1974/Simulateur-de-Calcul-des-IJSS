@@ -21,7 +21,6 @@
         - Quiz: Questions à choix multiples avec feedback coloré (Tailwind/JS) et rationales détaillées pour l'apprentissage.
         - Mode Sombre/Clair: Bouton toggle (HTML/JS) modifiant les classes Tailwind et les variables CSS pour une expérience visuelle personnalisable.
         - Justification: L'ensemble vise à maximiser l'interactivité et la clarté, en transformant des données textuelles en outils d'aide à la décision et d'apprentissage. -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
 
     <style>
         :root {
@@ -206,6 +205,7 @@
         }
         html.dark .quiz-navigation button:hover {
             background-color: var(--primary-dark) !important;
+            opacity: 0.9;
         }
     </style>
 </head>
@@ -215,9 +215,13 @@
         <header class="text-center mb-10 relative">
             <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-primary">Calcul des Indemnités Journalières (IJSS)</h1>
             <p class="mt-3 text-lg text-text-light">Un outil interactif pour maîtriser l'indemnisation des arrêts de travail.</p>
+            <p class="text-sm text-text-light mt-2">Règles à jour au 1er juillet 2025.</p>
             <button id="theme-toggle" class="absolute top-0 right-0 p-2 rounded-full text-text-light hover:text-primary transition-colors">
                 <svg id="moon-icon" class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
                 <svg id="sun-icon" class="w-6 h-6 hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 10a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 10a1 1 0 110-2h1a1 1 0 110 2h-1zm-9 4a1 1 0 011-1h1a1 1 0 110 2H9a1 1 0 01-1-1zm-.464-4.95l-.707-.707a1 1 0 00-1.414 1.414l.707.707a1 1 0 001.414-1.414zM3 10a1 1 0 110-2h1a1 1 0 110 2H3zm.879-8.485A1 1 0 014.393 2.12l.707.707a1 1 0 01-1.414 1.414L3.879 3.536A1 1 0 013.879 2.12zM10 15a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1z"></path></svg>
+            </button>
+            <button id="soundToggle" class="absolute top-0 right-12 p-2 rounded-full text-text-light hover:text-primary transition-colors">
+                🔊 / 🔇
             </button>
         </header>
 
@@ -228,7 +232,7 @@
                     Maladie
                 </button>
                 <button class="tab-button inline-flex items-center justify-center p-4 gap-2" data-tab="atmp">
-                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8.211 1.047a.5.5 0 0 0-.422 0l-7.5 3.5a.5.5 0 0 0 .025.917l7.5 3a.5.5 0 0 0 .372 0l7.5-3a.5.5 0 0 0 .025-.917zM4.468 5.64L8 7.233l3.532-1.593L8 4.047zM1 9.5l7.5 3a.5.5 0 0 0 .372 0l7.5-3v-3.372h-1v2.973l-6.5 2.6v-2.973H1z"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8.211 1.047a.5.5 0 0 0-.422 0l-7.5 3.5a.5.5 0 0 0 .025.917l7.5 3a.5.5 0 0 0 .372 0l7.5-3a.5.5 0 0 0 .025-.917zM4.468 5.64L8 7.233l3.532-1.593L8 4.047zM1 9.5l7.5 3a.5.5 0 0 0 .372 0l7.5-3v-3.372h-1v2.973l-6.5 2.6v-2.973H1z"/></svg>
                     Accident / Maladie Pro
                 </button>
                 <button class="tab-button inline-flex items-center justify-center p-4 gap-2" data-tab="famille">
@@ -239,11 +243,11 @@
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 .5a.5.5 0 0 0-1 0V1H2a2 2 0 0 0-2 2v1h16V3a2 2 0 0 0-2-2h-1V.5a.5.5 0 0 0-1 0V1H4zM16 14V5H0v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2M8.5 7h1v1h-1zM5 7h1v1H5zm5 3h1v1h-1zM8.5 10h1v1h-1zM5 10h1v1H5z"/></svg>
                     Acquisition Congés Payés
                 </button>
-                 <button class="tab-button inline-flex items-center justify-center p-4 gap-2" data-tab="comparaison">
+                <button class="tab-button inline-flex items-center justify-center p-4 gap-2" data-tab="comparaison">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M1 11a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1zm5-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1zm5-5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1z"/></svg>
                     Comparaison
                 </button>
-                 <button class="tab-button inline-flex items-center justify-center p-4 gap-2" data-tab="quiz">
+                <button class="tab-button inline-flex items-center justify-center p-4 gap-2" data-tab="quiz">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M14.5 3a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5zm-13-1A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2z"/><path d="M7 5.5a1 1 0 0 1 1-1h.5a1 1 0 0 1 1 1v.5a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1zm1 2.5a.5.5 0 0 0-.5.5v.5a.5.5 0 0 0 .5.5h.5a.5.5 0 0 0 .5-.5V8.5a.5.5 0 0 0-.5-.5zM8 11a.5.5 0 0 0-.5.5v.5a.5.5 0 0 0 1 0v-.5a.5.5 0 0 0-.5-.5"/></svg>
                     Quiz
                 </button>
@@ -260,15 +264,15 @@
                     <div class="space-y-6">
                         <div class="card">
                             <h3 class="font-semibold text-lg mb-2">Délai de Carence</h3>
-                            <p><span class="font-bold text-2xl text-primary">3</span> jours calendaires. L'indemnisation par la CPAM débute au 4ème jour d'arrêt.</p>
+                            <p><span class="font-bold text-2xl text-primary">3</span> jours calendaires. L'indemnisation par la CPAM débute au 4ème jour d'arrêt. (<a href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006750316/" target="_blank" class="text-primary hover:underline">Art. L. 323-1 Code de la Sécurité Sociale</a>)</p>
                         </div>
                         <div class="card">
                             <h3 class="font-semibold text-lg mb-2">Taux d'Indemnisation</h3>
-                            <p><span class="font-bold text-2xl text-primary">50%</span> du Salaire Journalier de Référence (SJR).</p>
+                            <p><span class="font-bold text-2xl text-primary">50%</span> du Salaire Journalier de Référence (SJR). (<a href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006750316/" target="_blank" class="text-primary hover:underline">Art. L. 323-4 Code de la Sécurité Sociale</a>)</p>
                         </div>
                         <div class="card">
                             <h3 class="font-semibold text-lg mb-2">Plafonnement</h3>
-                            <p>Le salaire brut est limité à <span class="font-bold text-secondary">1,4 fois le SMIC</span> mensuel pour le calcul du SJR.</p>
+                            <p>Le salaire brut est limité à <span class="font-bold text-secondary">1,4 fois le SMIC</span> mensuel pour le calcul du SJR. (<a href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006750316/" target="_blank" class="text-primary hover:underline">Art. L. 323-4 Code de la Sécurité Sociale</a>)</p>
                         </div>
                     </div>
                     <div class="card">
@@ -297,21 +301,21 @@
                 </p>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div class="space-y-6">
-                         <div class="card">
+                        <div class="card">
                             <h3 class="font-semibold text-lg mb-2">Délai de Carence</h3>
-                            <p><span class="font-bold text-2xl text-primary">0</span> jour. L'indemnisation débute dès le lendemain de l'accident.</p>
+                            <p><span class="font-bold text-2xl text-primary">0</span> jour. L'indemnisation débute dès le lendemain de l'accident. (<a href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006750316/" target="_blank" class="text-primary hover:underline">Art. L. 433-1 Code de la Sécurité Sociale</a>)</p>
                         </div>
                         <div class="card">
                             <h3 class="font-semibold text-lg mb-2">Taux d'Indemnisation</h3>
                             <p><span class="font-bold text-2xl text-primary">60%</span> du SJR les 28 premiers jours.</p>
-                            <p class="mt-1"><span class="font-bold text-2xl text-secondary">80%</span> du SJR à partir du 29ème jour.</p>
+                            <p class="mt-1"><span class="font-bold text-2xl text-secondary">80%</span> du SJR à partir du 29ème jour. (<a href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006750316/" target="_blank" class="text-primary hover:underline">Art. R. 433-5 Code de la Sécurité Sociale</a>)</p>
                         </div>
                         <div class="card">
                             <h3 class="font-semibold text-lg mb-2">Base de Calcul</h3>
-                            <p>Le SJR est calculé sur le salaire brut du mois précédant l'arrêt, divisé par 30,42.</p>
+                            <p>Le SJR est calculé sur le salaire brut du mois précédant l'arrêt, divisé par 30,42. (<a href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006750316/" target="_blank" class="text-primary hover:underline">Art. R. 433-5 Code de la Sécurité Sociale</a>)</p>
                         </div>
                     </div>
-                     <div class="card">
+                    <div class="card">
                         <h3 class="font-semibold text-xl mb-4 text-center">Simulateur AT / MP</h3>
                         <div class="space-y-4">
                             <div>
@@ -324,7 +328,7 @@
                             </div>
                         </div>
                         <div id="atmp-result" class="mt-6 space-y-2 result-box">
-                           Calcul en attente...
+                            Calcul en attente...
                         </div>
                     </div>
                 </div>
@@ -335,25 +339,25 @@
                 <p class="text-center mb-8 max-w-3xl mx-auto text-text-light">
                     Les congés liés à l'arrivée d'un enfant (Maternité, Paternité, Adoption) bénéficient d'une indemnisation intégrale du salaire journalier de référence, sans délai de carence. Le calcul du SJR est spécifique pour se rapprocher du salaire net.
                 </p>
-                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div class="space-y-6">
-                         <div class="card">
+                        <div class="card">
                             <h3 class="font-semibold text-lg mb-2">Délai de Carence</h3>
-                            <p><span class="font-bold text-2xl text-primary">0</span> jour. L'indemnisation débute le premier jour du congé.</p>
+                            <p><span class="font-bold text-2xl text-primary">0</span> jour. L'indemnisation débute le premier jour du congé. (<a href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006750316/" target="_blank" class="text-primary hover:underline">Art. L. 331-3 Code de la Sécurité Sociale</a>)</p>
                         </div>
                         <div class="card">
                             <h3 class="font-semibold text-lg mb-2">Taux d'Indemnisation</h3>
-                            <p><span class="font-bold text-2xl text-primary">100%</span> du Salaire Journalier de Référence.</p>
+                            <p><span class="font-bold text-2xl text-primary">100%</span> du Salaire Journalier de Référence. (<a href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006750316/" target="_blank" class="text-primary hover:underline">Art. L. 331-3 Code de la Sécurité Sociale</a>)</p>
                         </div>
                         <div class="card">
                             <h3 class="font-semibold text-lg mb-2">Base de Calcul</h3>
-                            <p>Le SJR est calculé sur la moyenne des 3 derniers salaires bruts (limités au PMSS), après un abattement de <span class="font-bold text-secondary">21%</span>.</p>
+                            <p>Le SJR est calculé sur la moyenne des 3 derniers salaires bruts (limités au PMSS), après un abattement de <span class="font-bold text-secondary">21%</span>. (<a href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006750316/" target="_blank" class="text-primary hover:underline">Art. R. 331-5 Code de la Sécurité Sociale</a>)</p>
                         </div>
                     </div>
-                     <div class="card">
+                    <div class="card">
                         <h3 class="font-semibold text-xl mb-4 text-center">Simulateur Maternité / Paternité</h3>
                         <div class="space-y-4">
-                           <div>
+                            <div>
                                 <label for="famille-salaire" class="block text-sm font-medium mb-1">Salaire Brut Mensuel Moyen (€)</label>
                                 <input type="number" id="famille-salaire" class="input-field" placeholder="Ex: 2700" value="2700">
                             </div>
@@ -363,7 +367,7 @@
                             </div>
                         </div>
                         <div id="famille-result" class="mt-6 space-y-2 result-box">
-                           Calcul en attente...
+                            Calcul en attente...
                         </div>
                     </div>
                 </div>
@@ -376,20 +380,20 @@
                 </p>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div class="space-y-6">
-                         <div class="card">
+                        <div class="card">
                             <h3 class="font-semibold text-lg mb-2">Taux d'Acquisition</h3>
-                            <p><span class="font-bold text-2xl text-primary">2</span> jours ouvrables par mois d'arrêt maladie non pro.</p>
+                            <p><span class="font-bold text-2xl text-primary">2</span> jours ouvrables par mois d'arrêt maladie non pro. (<a href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006900984/" target="_blank" class="text-primary hover:underline">Art. L. 3141-5 Code du travail</a>)</p>
                         </div>
                         <div class="card">
                             <h3 class="font-semibold text-lg mb-2">Plafonnement Annuel</h3>
-                            <p>L'acquisition est limitée à <span class="font-bold text-2xl text-secondary">24</span> jours ouvrables par an au titre de la maladie.</p>
+                            <p>L'acquisition est limitée à <span class="font-bold text-2xl text-secondary">24</span> jours ouvrables par an au titre de la maladie. (<a href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006900984/" target="_blank" class="text-primary hover:underline">Art. L. 3141-5 Code du travail</a>)</p>
                         </div>
                         <div class="card">
                             <h3 class="font-semibold text-lg mb-2">Report des Congés</h3>
-                            <p>Le salarié dispose de <span class="font-bold text-primary">15 mois</span> après son retour pour prendre les congés non pris, suite à l'information de l'employeur.</p>
+                            <p>Le salarié dispose de <span class="font-bold text-primary">15 mois</span> après son retour pour prendre les congés non pris, suite à l'information de l'employeur. (<a href="https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006900984/" target="_blank" class="text-primary hover:underline">Art. L. 3141-28-1 Code du travail</a>)</p>
                         </div>
                     </div>
-                     <div class="card">
+                    <div class="card">
                         <h3 class="font-semibold text-xl mb-4 text-center">Simulateur d'Acquisition</h3>
                         <div class="space-y-4">
                             <div>
@@ -398,7 +402,7 @@
                             </div>
                         </div>
                         <div id="conges-result" class="mt-6 space-y-2 result-box">
-                           Calcul en attente...
+                            Calcul en attente...
                         </div>
                     </div>
                 </div>
@@ -406,7 +410,7 @@
             
             <!-- Comparaison Section -->
             <div id="comparaison-content" class="tab-pane hidden">
-                 <p class="text-center mb-8 max-w-3xl mx-auto text-text-light">
+                <p class="text-center mb-8 max-w-3xl mx-auto text-text-light">
                     Ce graphique compare les principales caractéristiques d'indemnisation (délai de carence et taux) pour chaque type d'arrêt de travail. Cela permet de visualiser rapidement les différences entre les régimes.
                 </p>
                 <div class="card">
@@ -440,11 +444,30 @@
     </div>
 
     <script>
+        // --- CONSTANTES 2025 (Réglementation au 1er juillet 2025) ---
+        // Les valeurs ci-dessous sont confirmées comme étant en vigueur au 1er juillet 2025,
+        // sans modification par rapport aux revalorisations du 1er janvier ou 1er avril 2025.
+        const SMIC_MENSUEL_BRUT_2025 = 1801.80; // Source: Insee, La Paie Facile (stable depuis Nov 2024)
+        const PMSS_MENSUEL_2025 = 3925; // Source: Service-Public.fr, BOSS (fixé au 1er Janvier 2025)
+        const PLAFOND_IJSS_MALADIE_2025_BRUT = 41.47; // Source: LegiSocial, AXA (applicable depuis le 1er Avril 2025)
+        const PLAFOND_IJSS_PATERNITE_2025_BRUT = 101.94; // Source: Culture RH (fixé au 1er Janvier 2025)
+        const PLAFOND_IJSS_ATMP_60_2025_BRUT = 235.69; // Source: Culture RH (fixé au 1er Janvier 2025)
+        const PLAFOND_IJSS_ATMP_80_2025_BRUT = 314.25; // Source: Culture RH (fixé au 1er Janvier 2025)
+
         const data = {
-            smicMensuel: 1766.92, 
-            pmss: 3864,
+            smicMensuel: SMIC_MENSUEL_BRUT_2025,
+            pmss: PMSS_MENSUEL_2025,
             csgCrdsRate: 0.067,
         };
+
+        // Définition des couleurs pour les modes clair et sombre
+        const FONT_COLOR_LIGHT = '#3D3D3D'; /* Texte sombre pour mode clair */
+        const GRID_COLOR_LIGHT = '#e5e7eb'; /* Grille claire pour mode clair */
+        const FONT_COLOR_DARK = '#E2E8F0'; /* Texte clair pour mode sombre */
+        const GRID_COLOR_DARK = '#4A5568'; /* Grille sombre pour mode sombre */
+
+        let currentFontColor; // Déclaré ici
+        let currentGridColor; // Déclaré ici
 
         const tabs = document.querySelectorAll('.tab-button');
         const panes = document.querySelectorAll('.tab-pane');
@@ -465,6 +488,9 @@
                         pane.classList.remove('active');
                     }
                 });
+                // Re-initialize charts when tab changes to ensure they are rendered correctly
+                // This will be called by updateChartColorsForTheme via applyTheme
+                // No direct call to initializeCharts() here.
             });
         });
         
@@ -485,7 +511,7 @@
             const plafondSalaire = 1.4 * data.smicMensuel;
             const salaireRetenu = Math.min(salaireBrut, plafondSalaire);
             const sjr = (salaireRetenu * 3) / 91.25;
-            const ijssBruteJournaliere = sjr * 0.5;
+            const ijssBruteJournaliere = Math.min(sjr * 0.5, PLAFOND_IJSS_MALADIE_2025_BRUT);
 
             const joursCarence = 3;
             const joursIndemnises = Math.max(0, duree - joursCarence);
@@ -517,21 +543,24 @@
             const sjr = salaireBrut / 30.42;
             let totalIjssBrutes = 0;
 
-            const joursTaux60 = Math.min(duree, 28);
-            const ijssBruteJournaliere60 = sjr * 0.6;
+            const gainJournalierNet = sjr * (1 - 0.21); // Gain journalier net pour plafonnement
+
+            const joursTaux60 = Math.min(duree, 27); // Jours indemnisés à 60% (hors jour de l'accident)
+            const ijssBruteJournaliere60 = Math.min(sjr * 0.6, gainJournalierNet, PLAFOND_IJSS_ATMP_60_2025_BRUT);
             totalIjssBrutes += joursTaux60 * ijssBruteJournaliere60;
 
-            const joursTaux80 = Math.max(0, duree - 28);
-            const ijssBruteJournaliere80 = sjr * 0.8;
+            const joursTaux80 = Math.max(0, duree - 27); // Jours indemnisés à 80% (après les 27 premiers)
+            const ijssBruteJournaliere80 = Math.min(sjr * 0.8, gainJournalierNet, PLAFOND_IJSS_ATMP_80_2025_BRUT);
             totalIjssBrutes += joursTaux80 * ijssBruteJournaliere80;
 
             const totalIjssNettes = totalIjssBrutes * (1 - data.csgCrdsRate);
 
              resultAtmp.innerHTML = `
                 <p><strong>Salaire Journalier de Réf. (SJR) :</strong> ${formatCurrency(sjr)}</p>
-                <p><strong>IJSS (J1-28) :</strong> ${formatCurrency(ijssBruteJournaliere60)}/j</p>
-                <p><strong>IJSS (dès J29) :</strong> ${formatCurrency(ijssBruteJournaliere80)}/j</p>
-                 <p><strong>Jours indemnisés :</strong> ${duree} (pas de carence)</p>
+                <p><strong>Gain Journalier Net :</strong> ${formatCurrency(gainJournalierNet)}</p>
+                <p><strong>IJSS (J1-28 de l'arrêt) :</strong> ${formatCurrency(ijssBruteJournaliere60)}/j</p>
+                <p><strong>IJSS (dès J29 de l'arrêt) :</strong> ${formatCurrency(ijssBruteJournaliere80)}/j</p>
+                <p><strong>Jours indemnisés :</strong> ${duree} (pas de carence CPAM)</p>
                 <p class="font-bold mt-2">Total IJSS Brutes estimé : ${formatCurrency(totalIjssBrutes)}</p>
                 <p class="font-bold">Total IJSS Nettes estimé : ${formatCurrency(totalIjssNettes)}</p>
             `;
@@ -550,10 +579,9 @@
             }
 
             const salaireRetenu = Math.min(salaireBrut, data.pmss);
-            const salaireApresAbattement = salaireRetenu * (1 - 0.21);
+            const salaireApresAbattement = salaireRetenu * (1 - 0.21); // Abattement de 21%
             const sjr = (salaireApresAbattement * 3) / 91.25;
-            const ijssPlafondJournalier = data.pmss * 12 / 365;
-            const ijssBruteJournaliere = Math.min(sjr, ijssPlafondJournalier);
+            const ijssBruteJournaliere = Math.min(sjr, PLAFOND_IJSS_PATERNITE_2025_BRUT); // Plafond IJSS Famille
 
             const totalIjssBrutes = duree * ijssBruteJournaliere;
             const totalIjssNettes = totalIjssBrutes * (1 - data.csgCrdsRate);
@@ -564,7 +592,7 @@
                 <p><strong>Jours indemnisés :</strong> ${duree} (pas de carence)</p>
                 <p class="font-bold mt-2">Total IJSS Brutes estimé : ${formatCurrency(totalIjssBrutes)}</p>
                 <p class="font-bold">Total IJSS Nettes estimé : ${formatCurrency(totalIjssNettes)}</p>
-                 <p class="text-xs mt-2 italic">Basé sur un salaire retenu de ${formatCurrency(salaireRetenu)} (plafonné au PMSS).</p>
+                <p class="text-xs mt-2 italic">Basé sur un salaire retenu de ${formatCurrency(salaireRetenu)} (plafonné au PMSS).</p>
             `;
         }
         
@@ -577,7 +605,7 @@
                 resultConges.innerHTML = 'Veuillez entrer une valeur positive.';
                 return;
             }
-            const joursAcquis = dureeMois * 2;
+            const joursAcquis = Math.min(dureeMois * 2, 24); // Plafonné à 24 jours ouvrables par an
             resultConges.innerHTML = `<p>Pour ${dureeMois} mois d'arrêt, le salarié acquiert : <br><strong class="text-xl">${joursAcquis} jours ouvrables</strong> de congés payés (plafonné à 24 par an).</p>`;
         }
         
@@ -586,132 +614,359 @@
         inputsFamille.forEach(input => input.addEventListener('input', calculateFamille));
         inputConges.addEventListener('input', calculateConges);
 
-        calculateMaladie();
-        calculateAtmp();
-        calculateFamille();
-        calculateConges();
-        
-        const ctx = document.getElementById('comparisonChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: ['Maladie', 'AT / MP (J1-28)', 'AT / MP (dès J29)', 'Maternité / Paternité'],
-                datasets: [{
-                    label: 'Taux d\'indemnisation (% du SJR)',
-                    data: [50, 60, 80, 100],
-                    backgroundColor: [
-                        'rgba(213, 137, 124, 0.6)',
-                        'rgba(74, 108, 111, 0.6)',
-                        'rgba(74, 108, 111, 0.8)',
-                        'rgba(93, 132, 108, 0.6)',
-                    ],
-                    borderColor: [
-                        '#C06C5D',
-                        '#4A6C6F',
-                        '#4A6C6F',
-                        '#5D846C',
-                    ],
-                    borderWidth: 2
-                }, {
-                    label: 'Jours de carence',
-                    data: [3, 0, 0, 0],
-                    backgroundColor: 'rgba(90, 90, 90, 0.2)',
-                    borderColor: '#5A5A5A',
-                    borderWidth: 1,
-                    type: 'line',
-                    yAxisID: 'y1',
-                    stepped: true
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: { display: true, text: 'Taux Indemnisation (%)' },
-                        max: 100
-                    },
-                    y1: {
-                        type: 'linear',
-                        display: true,
-                        position: 'right',
-                        title: { display: true, text: 'Jours de Carence' },
-                        grid: { drawOnChartArea: false },
-                        min: 0,
-                        max: 7,
-                        ticks: { stepSize: 1 }
+        // Fonction pour envelopper les étiquettes longues des graphiques
+        function wrapLabel(str, maxWidth) {
+            if (str.length <= maxWidth) {
+                return str;
+            }
+            const words = str.split(' ');
+            let lines = [];
+            let currentLine = words[0];
+            for (let i = 1; i < words.length; i++) {
+                if (currentLine.length + words[i].length + 1 < maxWidth) {
+                    currentLine += ' ' + words[i];
+                } else {
+                    lines.push(currentLine);
+                    currentLine = words[i];
+                }
+            }
+            lines.push(currentLine);
+            return lines;
+        }
+
+        // Callback pour l'affichage des titres de tooltip dans Chart.js
+        const tooltipTitleCallback = (tooltipItems) => {
+            const item = tooltipItems[0];
+            let label = item.chart.data.labels[item.dataIndex];
+            if (Array.isArray(label)) {
+                return label.join(' ');
+            } else {
+                return label;
+            }
+        };
+
+        // Options par défaut pour les graphiques Chart.js
+        const defaultChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: currentFontColor,
+                        font: { size: 14 }
                     }
                 },
+                tooltip: {
+                    callbacks: {
+                        title: tooltipTitleCallback
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    ticks: { color: currentFontColor, font: { size: 12 } },
+                    grid: { color: currentGridColor }
+                },
+                y: {
+                    ticks: { color: currentFontColor, font: { size: 12 } },
+                    grid: { color: currentGridColor },
+                    beginAtZero: true
+                }
+            }
+        };
+
+        // Stocke les instances de graphique
+        const chartInstances = {};
+
+        // Fonction d'initialisation/réinitialisation d'un graphique spécifique
+        function initializeChartInstance(canvasId, chartType, chartData, chartOptions) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) {
+                console.warn(`Canvas with ID '${canvasId}' not found. Skipping chart initialization.`);
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (chartInstances[canvasId]) {
+                chartInstances[canvasId].destroy(); // Détruit l'ancienne instance si elle existe
+            }
+            chartInstances[canvasId] = new Chart(ctx, {
+                type: chartType,
+                data: chartData,
+                options: chartOptions
+            });
+        }
+
+        // Données pour le graphique CSG/CRDS
+        const csgData = {
+            labels: ['IJSS Nettes Versées (93.3%)', 'Prélèvements CSG/CRDS (6.7%)'],
+            datasets: [{
+                data: [93.3, 6.7],
+                backgroundColor: ['#4A6C6F', '#C06C5D'],
+                borderColor: '#FFFFFF',
+                borderWidth: 2,
+                hoverOffset: 4
+            }]
+        };
+
+        // Données pour le graphique de comparaison des taux
+        const rateComparisonData = {
+            labels: [
+                wrapLabel('Maladie Non Professionnelle', 16),
+                wrapLabel('AT/MP (< 29 jours)', 16),
+                wrapLabel('AT/MP (> 28 jours)', 16),
+                wrapLabel('Maternité / Paternité', 16)
+            ],
+            datasets: [{
+                label: 'Taux d\'indemnisation (% du SJR)',
+                data: [50, 60, 80, 100],
+                backgroundColor: [
+                    'rgba(192, 108, 93, 0.6)', // Secondary-light
+                    'rgba(74, 108, 111, 0.6)', // Primary-light (60%)
+                    'rgba(74, 108, 111, 0.8)', // Primary-light (80%)
+                    'rgba(93, 132, 108, 0.6)', // Greenish for family
+                ],
+                borderColor: [
+                    '#C06C5D',
+                    '#4A6C6F',
+                    '#4A6C6F',
+                    '#5D846C',
+                ],
+                borderWidth: 2
+            }, {
+                label: 'Jours de carence (CPAM)',
+                data: [3, 0, 0, 0],
+                backgroundColor: 'rgba(90, 90, 90, 0.2)',
+                borderColor: '#5A5A5A',
+                borderWidth: 1,
+                type: 'line',
+                yAxisID: 'y1',
+                stepped: true
+            }]
+        };
+
+        // Initialisation des graphiques au chargement de la page
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialisation des calculs des simulateurs
+            calculateMaladie();
+            calculateAtmp();
+            calculateFamille();
+            calculateConges();
+
+            // Initialisation des graphiques (appelée une fois au début)
+            initializeChartInstance('csgChart', 'doughnut', csgData, {
+                responsive: true,
+                maintainAspectRatio: false,
                 plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: currentFontColor,
+                            font: { size: 12 }
+                        }
+                    },
                     tooltip: {
-                         callbacks: {
-                            label: function(context) {
-                                let label = context.dataset.label || '';
-                                if (label) {
-                                    label += ': ';
-                                }
-                                if (context.parsed.y !== null) {
-                                    if(context.datasetIndex === 0)
-                                        label += context.parsed.y + '%';
-                                    else
-                                        label += context.parsed.y + ' jours';
-                                }
-                                return label;
-                            }
+                        callbacks: {
+                            title: tooltipTitleCallback
                         }
                     }
                 }
+            });
+
+            // Initialisation du graphique de comparaison (il est dans un onglet, donc peut être null si l'onglet n'est pas actif)
+            // Il sera réinitialisé par updateChartColorsForTheme quand l'onglet sera actif.
+            // Pour le moment, on ne l'initialise pas ici, car il est dans un onglet caché par défaut.
+            // Il sera créé lors de l'activation de son onglet.
+            
+            // Applique le thème initial et initialise les couleurs des graphiques
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                applyTheme(savedTheme);
+            } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                applyTheme('dark');
+            } else {
+                applyTheme('light');
             }
         });
 
-        // Theme Toggle Logic
+        // Logique de bascule du thème (clair/sombre)
         const themeToggle = document.getElementById('theme-toggle');
         const htmlElement = document.documentElement;
         const sunIcon = document.getElementById('sun-icon');
         const moonIcon = document.getElementById('moon-icon');
 
-        themeToggle.addEventListener('click', () => {
-            if (htmlElement.classList.contains('light')) {
-                htmlElement.classList.remove('light');
-                htmlElement.classList.add('dark');
-                localStorage.setItem('theme', 'dark');
+        function applyTheme(theme) {
+            htmlElement.classList.remove('light', 'dark');
+            htmlElement.classList.add(theme);
+            localStorage.setItem('theme', theme);
+            if (theme === 'dark') {
                 sunIcon.classList.remove('hidden');
                 moonIcon.classList.add('hidden');
             } else {
-                htmlElement.classList.remove('dark');
-                htmlElement.classList.add('light');
-                localStorage.setItem('theme', 'light');
                 sunIcon.classList.add('hidden');
                 moonIcon.classList.remove('hidden');
             }
-        });
-
-        // Set initial theme from localStorage
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        if (savedTheme === 'dark') {
-            htmlElement.classList.add('dark');
-            sunIcon.classList.remove('hidden');
-            moonIcon.classList.add('hidden');
-        } else {
-            htmlElement.classList.add('light');
-            sunIcon.classList.add('hidden');
-            moonIcon.classList.remove('hidden');
+            updateChartColorsForTheme(theme === 'dark'); 
         }
 
-        // Quiz Logic
+        themeToggle.addEventListener('click', () => {
+            const newTheme = htmlElement.classList.contains('light') ? 'dark' : 'light';
+            applyTheme(newTheme);
+        });
+
+        // Met à jour les couleurs des graphiques lors du changement de thème
+        function updateChartColorsForTheme(isDarkMode) {
+            currentFontColor = isDarkMode ? FONT_COLOR_DARK : FONT_COLOR_LIGHT;
+            currentGridColor = isDarkMode ? GRID_COLOR_DARK : GRID_COLOR_LIGHT;
+
+            // Met à jour les options globales de Chart.js
+            Chart.defaults.color = currentFontColor;
+            Chart.defaults.borderColor = currentGridColor;
+
+            // Met à jour et recrée les graphiques existants avec les nouvelles couleurs
+            // Graphique CSG/CRDS (toujours visible)
+            initializeChartInstance('csgChart', 'doughnut', csgData, {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: currentFontColor,
+                            font: { size: 12 }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: tooltipTitleCallback
+                        }
+                    }
+                }
+            });
+
+            // Graphique de comparaison (créé/mis à jour seulement si son onglet est actif)
+            const comparisonTab = document.getElementById('comparaison-content');
+            if (!comparisonTab.classList.contains('hidden')) {
+                initializeChartInstance('comparisonChart', 'bar', rateComparisonData, {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'Taux Indemnisation (%)', color: currentFontColor },
+                            max: 100,
+                            ticks: { color: currentFontColor }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: { display: true, text: 'Jours de Carence', color: currentFontColor },
+                            grid: { drawOnChartArea: false },
+                            min: 0,
+                            max: 7,
+                            ticks: { stepSize: 1, color: currentFontColor }
+                        },
+                        x: {
+                            ticks: { color: currentFontColor },
+                            grid: { color: currentGridColor }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        if(context.datasetIndex === 0)
+                                            label += context.parsed.y + '%';
+                                        else
+                                            label += context.parsed.y + ' jours';
+                                    }
+                                    return label;
+                                }
+                            }
+                        },
+                        legend: {
+                            labels: {
+                                color: currentFontColor
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+
+        // Logique de feedback sonore
+        let audioContext;
+        let soundEnabled = localStorage.getItem('soundEnabled') === 'true'; // Récupère la préférence sonore, par défaut à true si non défini
+
+        const soundToggle = document.getElementById('soundToggle');
+
+        // Initialise le contexte audio
+        function initAudioContext() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        // Joue un son (correct ou incorrect)
+        function playSound(isCorrect) {
+            if (!soundEnabled) return; // Ne joue pas si le son est désactivé
+            initAudioContext(); // Assure que le contexte audio est initialisé
+
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            if (isCorrect) {
+                oscillator.frequency.setValueAtTime(880, audioContext.currentTime); // Note plus aiguë pour correct
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.2);
+            } else {
+                oscillator.frequency.setValueAtTime(440, audioContext.currentTime); // Note plus grave pour incorrect
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.3);
+            }
+
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + (isCorrect ? 0.2 : 0.3));
+        }
+
+        // Met à jour l'icône du bouton sonore
+        function updateSoundToggleIcon() {
+            soundToggle.textContent = soundEnabled ? '🔊 / 🔇' : '🔇 / 🔊';
+        }
+
+        // Écouteur d'événement pour le bouton sonore
+        soundToggle.addEventListener('click', () => {
+            soundEnabled = !soundEnabled; // Inverse l'état du son
+            localStorage.setItem('soundEnabled', soundEnabled); // Sauvegarde la préférence
+            updateSoundToggleIcon(); // Met à jour l'icône
+        });
+
+        // Définit l'icône sonore initiale au chargement
+        updateSoundToggleIcon();
+
+
+        // Logique du Quiz
         const quizQuestions = [
             {
-                question: "Un salarié a un salaire brut mensuel de 3 000 €. Le SMIC mensuel est de 1 800 €. Pour le calcul de ses IJSS pour un arrêt maladie non professionnelle, quel est le salaire brut qui sera retenu pour ce mois ?",
+                question: "Un salarié a un salaire brut mensuel de 3 000 €. Le SMIC mensuel est de 1 801,80 €. Pour le calcul de ses IJSS pour un arrêt maladie non professionnelle, quel est le salaire brut qui sera retenu pour ce mois ?",
                 answerOptions: [
                     {
                         text: "3 000 €",
-                        rationale: "Le salaire réel est pris en compte seulement s'il est inférieur au plafond légal. Dans ce cas, il le dépasse.",
+                        rationale: "Le salaire réel est pris en compte seulement s'il est inférieur au plafond légal. Dans ce cas, il le dépasse (1,4 x SMIC = 2 522,52 €).",
                         isCorrect: false
                     },
                     {
-                        text: "3 240 €",
-                        rationale: "Ce calcul correspond à l'ancien plafond (1 800 € x 1,8). La réglementation a changé, réduisant ce plafond à 1,4 fois le SMIC mensuel.",
+                        text: "3 243,24 €",
+                        rationale: "Ce calcul correspond à l'ancien plafond (1,8 x SMIC). La réglementation a changé au 1er avril 2025, réduisant ce plafond à 1,4 fois le SMIC mensuel.",
                         isCorrect: false
                     },
                     {
@@ -720,8 +975,8 @@
                         isCorrect: false
                     },
                     {
-                        text: "2 520 €",
-                        rationale: "Ce montant correspond au calcul du nouveau plafond applicable (1 800 € x 1,4 = 2 520 €), qui est utilisé car le salaire réel du salarié est supérieur à cette limite. Référence : Ameli.fr, Service-Public.fr.",
+                        text: "2 522,52 €",
+                        rationale: "Ce montant correspond au nouveau plafond applicable (1 801,80 € x 1,4 = 2 522,52 €), qui est utilisé car le salaire réel du salarié est supérieur à cette limite. Référence : <a href='https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006750316/' target='_blank' class='text-primary hover:underline'>Art. L. 323-4 Code de la Sécurité Sociale</a>.",
                         isCorrect: true
                     }
                 ]
@@ -736,7 +991,7 @@
                     },
                     {
                         text: "3 jours.",
-                        rationale: "Durant les 3 premiers jours (carence de la CPAM), seul l'employeur verse une rémunération grâce à la convention collective plus favorable. Les IJSS n'interviennent qu'ensuite. Référence : Code du Travail (principe de faveur), Ameli.fr.",
+                        rationale: "Durant les 3 premiers jours (carence de la CPAM), seul l'employeur verse une rémunération grâce à la convention collective plus favorable. Les IJSS n'interviennent qu'ensuite. Référence : <a href='https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006900984/' target='_blank' class='text-primary hover:underline'>Art. L. 1226-1 Code du Travail</a> (principe de faveur), <a href='https://www.ameli.fr/assure/remboursements/indemnites-journalieres-maladie-maternite-paternite/arret-maladie-salarie' target='_blank' class='text-primary hover:underline'>Ameli.fr</a>.",
                         isCorrect: true
                     },
                     {
@@ -756,12 +1011,12 @@
                 answerOptions: [
                     {
                         text: "Pour le congé paternité, le salaire brut de référence est diminué d'un taux forfaitaire de charges (21%).",
-                        rationale: "C'est la différence clé : pour se rapprocher du salaire net, le calcul pour le congé paternité (et maternité) applique cet abattement sur la base brute, ce qui n'est pas le cas pour la maladie. Référence : Ameli.fr, Service-Public.fr.",
+                        rationale: "C'est la différence clé : pour se rapprocher du salaire net, le calcul pour le congé paternité (et maternité) applique cet abattement sur la base brute, ce qui n'est pas le cas pour la maladie. Référence : <a href='https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006750316/' target='_blank' class='text-primary hover:underline'>Art. R. 331-5 Code de la Sécurité Sociale</a>.",
                         isCorrect: true
                     },
                     {
                         text: "Pour le congé paternité, on utilise les 12 derniers mois de salaire et non 3.",
-                        rationale: "La base de calcul pour les deux est généralement les 3 derniers mois de salaire (sauf activité saisonnière). La différence se situe ailleurs.",
+                        rationale: "La base de calcul pour les deux est généralement les 3 derniers mois de salaire (sauf activité saisonnière ou discontinue). La différence se situe ailleurs.",
                         isCorrect: false
                     },
                     {
@@ -771,7 +1026,7 @@
                     },
                     {
                         text: "Pour le congé paternité, il n'y a pas de plafonnement du salaire pris en compte.",
-                        rationale: "Il existe bien un plafonnement pour le congé paternité : le salaire de référence est limité au Plafond Mensuel de la Sécurité Sociale (PMSS).",
+                        rationale: "Il existe bien un plafonnement pour le congé paternité : le salaire de référence est limité au Plafond Mensuel de la Sécurité Sociale (PMSS). Référence : <a href='https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006750316/' target='_blank' class='text-primary hover:underline'>Art. R. 331-5 Code de la Sécurité Sociale</a>.",
                         isCorrect: false
                     }
                 ]
@@ -791,7 +1046,7 @@
                     },
                     {
                         text: "Il doit calculer un 'salaire rétabli' pour juin, comme si le salarié avait travaillé le mois entier.",
-                        rationale: "L'embauche en cours de mois est un des cas où l'employeur doit obligatoirement reconstituer un salaire théorique pour le mois concerné afin que le calcul de l'IJSS soit juste. Référence : Article R. 323-8 du Code de la Sécurité Sociale.",
+                        rationale: "L'embauche en cours de mois est un des cas où l'employeur doit obligatoirement reconstituer un salaire théorique pour le mois concerné afin que le calcul de l'IJSS soit juste. Référence : <a href='https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006750316/' target='_blank' class='text-primary hover:underline'>Art. R. 323-8 Code de la Sécurité Sociale</a>.",
                         isCorrect: true
                     },
                     {
@@ -806,7 +1061,7 @@
                 answerOptions: [
                     {
                         text: "Avoir au moins un an d'ancienneté dans l'entreprise.",
-                        rationale: "L'ancienneté est une condition liée au maintien de salaire par l'employeur selon le Code du Travail, mais elle n'impacte pas le droit aux IJSS versées par la Sécurité Sociale. Référence : Ameli.fr.",
+                        rationale: "L'ancienneté est une condition liée au maintien de salaire par l'employeur selon le Code du Travail (<a href='https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006900984/' target='_blank' class='text-primary hover:underline'>Art. L. 1226-1 Code du Travail</a>), mais elle n'impacte pas le droit aux IJSS versées par la Sécurité Sociale. Référence : <a href='https://www.ameli.fr/assure/droits-demarches/maladie-accident-travail-maladie-professionnelle/arret-travail-maladie/arret-travail-maladie-salarie' target='_blank' class='text-primary hover:underline'>Ameli.fr</a>.",
                         isCorrect: true
                     },
                     {
@@ -836,7 +1091,7 @@
                     },
                     {
                         text: "80% du SJR.",
-                        rationale: "Après 28 jours d'indemnisation pour un AT ou un accident de trajet, le taux de l'IJSS est porté à 80% du SJR. Le 30ème jour se situe dans cette nouvelle période. Référence : Ameli.fr, Service-Public.fr.",
+                        rationale: "Après 28 jours d'indemnisation pour un AT ou un accident de trajet, le taux de l'IJSS est porté à 80% du SJR. Le 30ème jour se situe dans cette nouvelle période. Référence : <a href='https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006750316/' target='_blank' class='text-primary hover:underline'>Art. L. 433-1 Code de la Sécurité Sociale</a>.",
                         isCorrect: true
                     },
                     {
@@ -866,7 +1121,7 @@
                     },
                     {
                         text: "reversées au salarié après déduction de la CSG/CRDS par la CPAM.",
-                        rationale: "La CPAM calcule les IJSS brutes, prélève la CSG/CRDS, et verse le net à l'employeur (en cas de subrogation) qui doit le reverser au salarié. Référence : Ameli.fr, Net-Entreprises.fr.",
+                        rationale: "La CPAM calcule les IJSS brutes, prélève la CSG/CRDS, et verse le net à l'employeur (en cas de subrogation) qui doit le reverser au salarié. Référence : <a href='https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006750316/' target='_blank' class='text-primary hover:underline'>Art. L. 323-1 Code de la Sécurité Sociale</a>.",
                         isCorrect: true
                     },
                     {
@@ -881,7 +1136,7 @@
                 answerOptions: [
                     {
                         text: "Comme une journée de travail normale, sans retenue pour absence.",
-                        rationale: "La loi prévoit que la journée au cours de laquelle l'accident a lieu, quelle que soit l'heure, est intégralement à la charge de l'employeur et ne doit pas faire l'objet d'une retenue. Référence : Article L. 433-1 du Code de la Sécurité Sociale.",
+                        rationale: "La loi prévoit que la journée au cours de laquelle l'accident a lieu, quelle que soit l'heure, est intégralement à la charge de l'employeur et ne doit pas faire l'objet d'une retenue. Référence : <a href='https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000006750316/' target='_blank' class='text-primary hover:underline'>Art. L. 433-1 Code de la Sécurité Sociale</a> et jurisprudence constante (<a href='https://www.legifrance.gouv.fr/juri/id/JURITEXT000007038161/' target='_blank' class='text-primary hover:underline'>Cass. Soc. 28 oct. 1999, n°97-43.180</a>).",
                         isCorrect: true
                     },
                     {
@@ -902,7 +1157,7 @@
                 ]
             },
             {
-                question: "Une salariée en congé maternité a une IJSS brute calculée de 95 €. Le plafond journalier de l'IJSS maternité est de 100,36 €. Quel sera le montant de son IJSS brute journalière versée ?",
+                question: "Une salariée en congé maternité a une IJSS brute calculée de 95 €. Le plafond journalier de l'IJSS maternité est de 101,94 €. Quel sera le montant de son IJSS brute journalière versée ?",
                 answerOptions: [
                     {
                         text: "47,50 €",
@@ -911,11 +1166,11 @@
                     },
                     {
                         text: "95 €",
-                        rationale: "Le montant de l'IJSS est égal au SJR calculé, tant que celui-ci ne dépasse pas le plafond journalier de la Sécurité Sociale. Ici, 95 € est inférieur à 100,36 €, donc le montant calculé est retenu. Référence : Ameli.fr, Service-Public.fr.",
+                        rationale: "Le montant de l'IJSS est égal au SJR calculé, tant que celui-ci ne dépasse pas le plafond journalier de la Sécurité Sociale. Ici, 95 € est inférieur à 101,94 €, donc le montant calculé est retenu. Référence : <a href='https://www.ameli.fr/assure/droits-demarches/famille/maternite-paternite-adoption/conge-maternite-accueil-enfant' target='_blank' class='text-primary hover:underline'>Ameli.fr</a>.",
                         isCorrect: true
                     },
                     {
-                        text: "100,36 €",
+                        text: "101,94 €",
                         rationale: "Le plafond n'est pas le montant versé systématiquement. Il représente une limite maximale. L'IJSS ne peut pas être supérieure au SJR calculé.",
                         isCorrect: false
                     },
@@ -941,7 +1196,7 @@
                     },
                     {
                         text: "résulte d'une négociation contractuelle ou collective.",
-                        rationale: "Contrairement aux IJSS qui relèvent de la loi, les garanties de prévoyance sont issues de contrats d'assurance, souvent mis en place via une convention collective ou un accord d'entreprise. Référence : Section 'Le complément employeur – Rôle de la prévoyance' du rapport.",
+                        rationale: "Contrairement aux IJSS qui relèvent de la loi, les garanties de prévoyance sont issues de contrats d'assurance, souvent mis en place via une convention collective ou un accord d'entreprise.",
                         isCorrect: true
                     },
                     {
@@ -976,7 +1231,7 @@
             }
 
             const questionData = quizQuestions[currentQuestionIndex];
-            quizQuestionElement.textContent = `Question ${currentQuestionIndex + 1} / ${quizQuestions.length}: ${questionData.question}`;
+            quizQuestionElement.innerHTML = `Question ${currentQuestionIndex + 1} / ${quizQuestions.length}: ${questionData.question}`;
 
             questionData.answerOptions.forEach((option, index) => {
                 const optionDiv = document.createElement('div');
@@ -1003,7 +1258,7 @@
 
                 const rationaleDiv = document.createElement('div');
                 rationaleDiv.classList.add('quiz-rationale', 'mt-2', 'p-2', 'rounded');
-                rationaleDiv.textContent = option.rationale;
+                rationaleDiv.innerHTML = option.rationale; // Use innerHTML for links
 
                 if (option.isCorrect) {
                     optionDiv.classList.add('correct');
@@ -1034,7 +1289,7 @@
         }
 
         function displayFinalScore() {
-            quizQuestionElement.textContent = 'Quiz Terminé !';
+            quizQuestionElement.innerHTML = 'Quiz Terminé !'; // Use innerHTML for potential links in score
             quizOptionsElement.innerHTML = '';
             quizFeedbackElement.innerHTML = '';
             quizNavigationElement.classList.add('hidden');
@@ -1062,6 +1317,17 @@
 
         const quizNavigationElement = document.querySelector('.quiz-navigation');
         loadQuestion(); // Load the first question when the page loads
+
+        // Initialisation des calculs des simulateurs au chargement
+        calculateMaladie();
+        calculateAtmp();
+        calculateFamille();
+        calculateConges();
+
+        // Initialisation des graphiques (appelée une fois au début)
+        // La fonction applyTheme gère déjà l'initialisation et la mise à jour des couleurs.
+        // On s'assure que les graphiques sont créés ou mis à jour au moment où le thème est appliqué.
+        // La fonction initializeChartInstance est appelée dans updateChartColorsForTheme.
     </script>
 
 </body>
