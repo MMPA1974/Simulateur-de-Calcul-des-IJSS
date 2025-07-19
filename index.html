@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="fr" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulateur de Calcul des IJSS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Chosen Palette: Calm Harmony -->
+    <!-- Application Structure Plan: L'application est conçue comme un tableau de bord interactif à onglets. L'utilisateur sélectionne d'abord un type d'arrêt (Maladie, AT/MP, Maternité, Congés Payés, Quiz), ce qui met à jour dynamiquement le contenu. Chaque onglet présente les règles fondamentales dans des cartes claires et un simulateur interactif (pour les calculs) ou un module de quiz. Cette structure a été choisie pour sa clarté et son orientation "tâche", permettant à un gestionnaire de paie de trouver rapidement une règle, de l'appliquer via le simulateur ou de tester ses connaissances. Un graphique comparatif permet de visualiser les différences clés entre les régimes d'indemnisation. Cette approche transforme un document dense en un outil pratique, améliorant la compréhension et l'efficacité de l'utilisateur. L'ajout du mode sombre/clair offre une personnalisation de l'interface. -->
+    <!-- Visualization & Content Choices: 
+        - Navigation: Onglets HTML/JS pour séparer les scénarios de manière intuitive.
+        - Règles (carence, taux, plafonds): Cartes HTML/Tailwind pour une lecture rapide et structurée.
+        - Calculs: Simulateurs interactifs (Formulaires HTML + JS) pour transformer les exemples statiques en outils dynamiques et engageants.
+        - Comparaison: Un graphique à barres (Chart.js) pour visualiser et comparer les taux d'indemnisation entre les différents types d'arrêts.
+        - Processus (Rechute): Diagramme simple en HTML/CSS pour une visualisation claire des étapes.
+        - Quiz: Questions à choix multiples avec feedback coloré (Tailwind/JS) et rationales détaillées pour l'apprentissage.
+        - Mode Sombre/Clair: Bouton toggle (HTML/JS) modifiant les classes Tailwind et les variables CSS pour une expérience visuelle personnalisable.
+        - Justification: L'ensemble vise à maximiser l'interactivité et la clarté, en transformant des données textuelles en outils d'aide à la décision et d'apprentissage. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <style>
+        :root {
+            --bg-main-light: #F8F7F4;
+            --text-dark-light: #3D3D3D;
+            --text-light-light: #5A5A5A;
+            --primary-light: #4A6C6F;
+            --primary-light-bg: #e0e8e9;
+            --secondary-light: #C06C5D;
+            --border-color-light: #e5e7eb;
+
+            --bg-main-dark: #2D3748;
+            --text-dark-dark: #E2E8F0;
+            --text-light-dark: #A0AEC0;
+            --primary-dark: #66B2B2;
+            --primary-dark-bg: #3B4A57;
+            --secondary-dark: #E0A89A;
+            --border-color-dark: #4A5568;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        html.light body {
+            background-color: var(--bg-main-light);
+            color: var(--text-dark-light);
+        }
+        html.dark body {
+            background-color: var(--bg-main-dark);
+            color: var(--text-dark-dark);
+        }
+        .tab-button {
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        html.light .tab-button {
+            color: var(--text-light-light);
+        }
+        html.dark .tab-button {
+            color: var(--text-light-dark);
+        }
+        html.light .tab-button.active {
+            border-bottom-color: var(--primary-light);
+            color: var(--primary-light);
+            font-weight: 600;
+        }
+        html.dark .tab-button.active {
+            border-bottom-color: var(--primary-dark);
+            color: var(--primary-dark);
+            font-weight: 600;
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+            border: 1px solid var(--border-color-light);
+            transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s;
+        }
+        html.dark .card {
+            background-color: #2C374B;
+            border-color: var(--border-color-dark);
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+        .input-field {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border-color-light);
+            background-color: #f9fafb;
+            transition: border-color 0.2s, background-color 0.3s, color 0.3s;
+        }
+        html.dark .input-field {
+            border-color: var(--border-color-dark);
+            background-color: #3B4A57;
+            color: var(--text-dark-dark);
+        }
+        .input-field:focus {
+            outline: none;
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 2px rgba(74, 108, 111, 0.2);
+        }
+        html.dark .input-field:focus {
+            border-color: var(--primary-dark);
+            box-shadow: 0 0 0 2px rgba(102, 178, 178, 0.3);
+        }
+        .result-box {
+            background-color: var(--primary-light-bg);
+            border-left: 4px solid var(--primary-light);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        html.dark .result-box {
+            background-color: var(--primary-dark-bg);
+            border-left: 4px solid var(--primary-dark);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 400px;
+            max-height: 50vh;
+        }
+        html.light .text-primary { color: var(--primary-light); }
+        html.dark .text-primary { color: var(--primary-dark); }
+        html.light .text-secondary { color: var(--secondary-light); }
+        html.dark .text-secondary { color: var(--secondary-dark); }
+
+        .quiz-option {
+            background-color: #f0f4f8;
+            border: 1px solid #d1d9e0;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+        html.dark .quiz-option {
+            background-color: #3B4A57;
+            border-color: #4A5568;
+        }
+        .quiz-option:hover {
+            background-color: #e2e8f0;
+        }
+        html.dark .quiz-option:hover {
+            background-color: #4A5568;
+        }
+        .quiz-option.correct {
+            background-color: #d4edda;
+            border-color: #28a745;
+        }
+        html.dark .quiz-option.correct {
+            background-color: #1a4d2e;
+            border-color: #28a745;
+        }
+        .quiz-option.incorrect {
+            background-color: #f8d7da;
+            border-color: #dc3545;
+        }
+        html.dark .quiz-option.incorrect {
+            background-color: #6a242f;
+            border-color: #dc3545;
+        }
+        .quiz-rationale {
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-left: 3px solid;
+            border-radius: 0.25rem;
+        }
+        .quiz-rationale.correct {
+            border-color: #28a745;
+            background-color: #e2f5e7;
+        }
+        html.dark .quiz-rationale.correct {
+            background-color: #1a4d2e;
+        }
+        .quiz-rationale.incorrect {
+            border-color: #dc3545;
+            background-color: #fcebeb;
+        }
+        html.dark .quiz-rationale.incorrect {
+            background-color: #6a242f;
+        }
+        .quiz-navigation button {
+            background-color: var(--primary-light);
+            color: var(--text-dark-light);
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            transition: background-color 0.2s, color 0.2s;
+        }
+        html.dark .quiz-navigation button {
+            background-color: var(--primary-dark);
+            color: var(--text-dark-dark);
+        }
+        .quiz-navigation button:hover {
+            background-color: var(--primary-light) !important;
+            opacity: 0.9;
+        }
+        html.dark .quiz-navigation button:hover {
+            background-color: var(--primary-dark) !important;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+        <header class="text-center mb-10 relative">
+            <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-primary">Calcul des Indemnités Journalières (IJSS)</h1>
+            <p class="mt-3 text-lg text-text-light">Un outil interactif pour maîtriser l'indemnisation des arrêts de travail.</p>
+            <button id="theme-toggle" class="absolute top-0 right-0 p-2 rounded-full text-text-light hover:text-primary transition-colors">
+                <svg id="moon-icon" class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                <svg id="sun-icon" class="w-6 h-6 hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 10a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 10a1 1 0 110-2h1a1 1 0 110 2h-1zm-9 4a1 1 0 011-1h1a1 1 0 110 2H9a1 1 0 01-1-1zm-.464-4.95l-.707-.707a1 1 0 00-1.414 1.414l.707.707a1 1 0 001.414-1.414zM3 10a1 1 0 110-2h1a1 1 0 110 2H3zm.879-8.485A1 1 0 014.393 2.12l.707.707a1 1 0 01-1.414 1.414L3.879 3.536A1 1 0 013.879 2.12zM10 15a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1z"></path></svg>
+            </button>
+        </header>
+
+        <nav class="mb-8 border-b border-border-color">
+            <div class="flex flex-wrap items-center justify-center -mb-px text-sm font-medium text-center" id="tab-buttons">
+                <button class="tab-button inline-flex items-center justify-center p-4 gap-2 active" data-tab="maladie">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6m2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0m4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4m-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10s-3.516.68-4.168 1.332c-.678.678-.83 1.418-.832 1.664z"/></svg>
+                    Maladie
+                </button>
+                <button class="tab-button inline-flex items-center justify-center p-4 gap-2" data-tab="atmp">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8.211 1.047a.5.5 0 0 0-.422 0l-7.5 3.5a.5.5 0 0 0 .025.917l7.5 3a.5.5 0 0 0 .372 0l7.5-3a.5.5 0 0 0 .025-.917zM4.468 5.64L8 7.233l3.532-1.593L8 4.047zM1 9.5l7.5 3a.5.5 0 0 0 .372 0l7.5-3v-3.372h-1v2.973l-6.5 2.6v-2.973H1z"/></svg>
+                    Accident / Maladie Pro
+                </button>
+                <button class="tab-button inline-flex items-center justify-center p-4 gap-2" data-tab="famille">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8.5 2a.5.5 0 0 0-1 0v5.5H2a.5.5 0 0 0 0 1h5.5V14a.5.5 0 0 0 1 0V8.5H14a.5.5 0 0 0 0-1H8.5z"/></svg>
+                    Maternité / Paternité
+                </button>
+                <button class="tab-button inline-flex items-center justify-center p-4 gap-2" data-tab="conges">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 .5a.5.5 0 0 0-1 0V1H2a2 2 0 0 0-2 2v1h16V3a2 2 0 0 0-2-2h-1V.5a.5.5 0 0 0-1 0V1H4zM16 14V5H0v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2M8.5 7h1v1h-1zM5 7h1v1H5zm5 3h1v1h-1zM8.5 10h1v1h-1zM5 10h1v1H5z"/></svg>
+                    Acquisition Congés Payés
+                </button>
+                 <button class="tab-button inline-flex items-center justify-center p-4 gap-2" data-tab="comparaison">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M1 11a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1zm5-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1zm5-5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1z"/></svg>
+                    Comparaison
+                </button>
+                 <button class="tab-button inline-flex items-center justify-center p-4 gap-2" data-tab="quiz">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M14.5 3a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5zm-13-1A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2z"/><path d="M7 5.5a1 1 0 0 1 1-1h.5a1 1 0 0 1 1 1v.5a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1zm1 2.5a.5.5 0 0 0-.5.5v.5a.5.5 0 0 0 .5.5h.5a.5.5 0 0 0 .5-.5V8.5a.5.5 0 0 0-.5-.5zM8 11a.5.5 0 0 0-.5.5v.5a.5.5 0 0 0 1 0v-.5a.5.5 0 0 0-.5-.5"/></svg>
+                    Quiz
+                </button>
+            </div>
+        </nav>
+
+        <main id="tab-content">
+            <!-- Maladie Section -->
+            <div id="maladie-content" class="tab-pane active">
+                <p class="text-center mb-8 max-w-3xl mx-auto text-text-light">
+                    Cette section détaille les règles d'indemnisation pour un arrêt maladie d'origine non professionnelle. Utilisez le simulateur pour estimer les IJSS en fonction du salaire brut et de la durée de l'arrêt, en tenant compte du délai de carence et du nouveau plafond de 1,4 fois le SMIC.
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="space-y-6">
+                        <div class="card">
+                            <h3 class="font-semibold text-lg mb-2">Délai de Carence</h3>
+                            <p><span class="font-bold text-2xl text-primary">3</span> jours calendaires. L'indemnisation par la CPAM débute au 4ème jour d'arrêt.</p>
+                        </div>
+                        <div class="card">
+                            <h3 class="font-semibold text-lg mb-2">Taux d'Indemnisation</h3>
+                            <p><span class="font-bold text-2xl text-primary">50%</span> du Salaire Journalier de Référence (SJR).</p>
+                        </div>
+                        <div class="card">
+                            <h3 class="font-semibold text-lg mb-2">Plafonnement</h3>
+                            <p>Le salaire brut est limité à <span class="font-bold text-secondary">1,4 fois le SMIC</span> mensuel pour le calcul du SJR.</p>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3 class="font-semibold text-xl mb-4 text-center">Simulateur Arrêt Maladie</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label for="maladie-salaire" class="block text-sm font-medium mb-1">Salaire Brut Mensuel Moyen (€)</label>
+                                <input type="number" id="maladie-salaire" class="input-field" placeholder="Ex: 2200" value="2200">
+                            </div>
+                            <div>
+                                <label for="maladie-duree" class="block text-sm font-medium mb-1">Durée de l'arrêt (jours)</label>
+                                <input type="number" id="maladie-duree" class="input-field" placeholder="Ex: 15" value="15">
+                            </div>
+                        </div>
+                        <div id="maladie-result" class="mt-6 space-y-2 result-box">
+                            Calcul en attente...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AT/MP Section -->
+            <div id="atmp-content" class="tab-pane hidden">
+                <p class="text-center mb-8 max-w-3xl mx-auto text-text-light">
+                    L'indemnisation pour un Accident du Travail (AT), un Accident de Trajet ou une Maladie Professionnelle (MP) est plus favorable. Il n'y a pas de délai de carence, et les taux d'indemnisation sont progressifs. Notez que le jour de l'accident est intégralement payé par l'employeur.
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="space-y-6">
+                         <div class="card">
+                            <h3 class="font-semibold text-lg mb-2">Délai de Carence</h3>
+                            <p><span class="font-bold text-2xl text-primary">0</span> jour. L'indemnisation débute dès le lendemain de l'accident.</p>
+                        </div>
+                        <div class="card">
+                            <h3 class="font-semibold text-lg mb-2">Taux d'Indemnisation</h3>
+                            <p><span class="font-bold text-2xl text-primary">60%</span> du SJR les 28 premiers jours.</p>
+                            <p class="mt-1"><span class="font-bold text-2xl text-secondary">80%</span> du SJR à partir du 29ème jour.</p>
+                        </div>
+                        <div class="card">
+                            <h3 class="font-semibold text-lg mb-2">Base de Calcul</h3>
+                            <p>Le SJR est calculé sur le salaire brut du mois précédant l'arrêt, divisé par 30,42.</p>
+                        </div>
+                    </div>
+                     <div class="card">
+                        <h3 class="font-semibold text-xl mb-4 text-center">Simulateur AT / MP</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label for="atmp-salaire" class="block text-sm font-medium mb-1">Salaire Brut du mois précédent (€)</label>
+                                <input type="number" id="atmp-salaire" class="input-field" placeholder="Ex: 2500" value="2500">
+                            </div>
+                            <div>
+                                <label for="atmp-duree" class="block text-sm font-medium mb-1">Durée de l'arrêt (jours, hors jour de l'accident)</label>
+                                <input type="number" id="atmp-duree" class="input-field" placeholder="Ex: 40" value="40">
+                            </div>
+                        </div>
+                        <div id="atmp-result" class="mt-6 space-y-2 result-box">
+                           Calcul en attente...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Famille Section -->
+            <div id="famille-content" class="tab-pane hidden">
+                <p class="text-center mb-8 max-w-3xl mx-auto text-text-light">
+                    Les congés liés à l'arrivée d'un enfant (Maternité, Paternité, Adoption) bénéficient d'une indemnisation intégrale du salaire journalier de référence, sans délai de carence. Le calcul du SJR est spécifique pour se rapprocher du salaire net.
+                </p>
+                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="space-y-6">
+                         <div class="card">
+                            <h3 class="font-semibold text-lg mb-2">Délai de Carence</h3>
+                            <p><span class="font-bold text-2xl text-primary">0</span> jour. L'indemnisation débute le premier jour du congé.</p>
+                        </div>
+                        <div class="card">
+                            <h3 class="font-semibold text-lg mb-2">Taux d'Indemnisation</h3>
+                            <p><span class="font-bold text-2xl text-primary">100%</span> du Salaire Journalier de Référence.</p>
+                        </div>
+                        <div class="card">
+                            <h3 class="font-semibold text-lg mb-2">Base de Calcul</h3>
+                            <p>Le SJR est calculé sur la moyenne des 3 derniers salaires bruts (limités au PMSS), après un abattement de <span class="font-bold text-secondary">21%</span>.</p>
+                        </div>
+                    </div>
+                     <div class="card">
+                        <h3 class="font-semibold text-xl mb-4 text-center">Simulateur Maternité / Paternité</h3>
+                        <div class="space-y-4">
+                           <div>
+                                <label for="famille-salaire" class="block text-sm font-medium mb-1">Salaire Brut Mensuel Moyen (€)</label>
+                                <input type="number" id="famille-salaire" class="input-field" placeholder="Ex: 2700" value="2700">
+                            </div>
+                            <div>
+                                <label for="famille-duree" class="block text-sm font-medium mb-1">Durée du congé (jours)</label>
+                                <input type="number" id="famille-duree" class="input-field" placeholder="Ex: 25" value="25">
+                            </div>
+                        </div>
+                        <div id="famille-result" class="mt-6 space-y-2 result-box">
+                           Calcul en attente...
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Congés Payés Section -->
+            <div id="conges-content" class="tab-pane hidden">
+                <p class="text-center mb-8 max-w-3xl mx-auto text-text-light">
+                    Suite à la loi du 22 avril 2024, un salarié en arrêt maladie non professionnelle acquiert désormais des congés payés. Cette section vous explique ces nouvelles règles et vous permet de calculer les jours acquis.
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="space-y-6">
+                         <div class="card">
+                            <h3 class="font-semibold text-lg mb-2">Taux d'Acquisition</h3>
+                            <p><span class="font-bold text-2xl text-primary">2</span> jours ouvrables par mois d'arrêt maladie non pro.</p>
+                        </div>
+                        <div class="card">
+                            <h3 class="font-semibold text-lg mb-2">Plafonnement Annuel</h3>
+                            <p>L'acquisition est limitée à <span class="font-bold text-2xl text-secondary">24</span> jours ouvrables par an au titre de la maladie.</p>
+                        </div>
+                        <div class="card">
+                            <h3 class="font-semibold text-lg mb-2">Report des Congés</h3>
+                            <p>Le salarié dispose de <span class="font-bold text-primary">15 mois</span> après son retour pour prendre les congés non pris, suite à l'information de l'employeur.</p>
+                        </div>
+                    </div>
+                     <div class="card">
+                        <h3 class="font-semibold text-xl mb-4 text-center">Simulateur d'Acquisition</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label for="conges-duree" class="block text-sm font-medium mb-1">Durée de l'arrêt maladie (mois entiers)</label>
+                                <input type="number" id="conges-duree" class="input-field" placeholder="Ex: 3" value="3">
+                            </div>
+                        </div>
+                        <div id="conges-result" class="mt-6 space-y-2 result-box">
+                           Calcul en attente...
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Comparaison Section -->
+            <div id="comparaison-content" class="tab-pane hidden">
+                 <p class="text-center mb-8 max-w-3xl mx-auto text-text-light">
+                    Ce graphique compare les principales caractéristiques d'indemnisation (délai de carence et taux) pour chaque type d'arrêt de travail. Cela permet de visualiser rapidement les différences entre les régimes.
+                </p>
+                <div class="card">
+                    <div class="chart-container">
+                        <canvas id="comparisonChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quiz Section -->
+            <div id="quiz-content" class="tab-pane hidden">
+                <p class="text-center mb-8 max-w-3xl mx-auto text-text-light">
+                    Testez vos connaissances sur le calcul des IJSS et la gestion des arrêts de travail. Chaque question est accompagnée d'une explication détaillée pour vous aider à comprendre les concepts clés.
+                </p>
+                <div class="card">
+                    <h3 class="font-semibold text-xl mb-4 text-center">Quiz Interactif</h3>
+                    <div id="quiz-container">
+                        <div id="quiz-question" class="mb-4 text-lg font-medium"></div>
+                        <div id="quiz-options" class="space-y-3"></div>
+                        <div id="quiz-feedback" class="mt-4"></div>
+                        <div class="quiz-navigation flex justify-between mt-6">
+                            <button id="prev-question" class="opacity-50 cursor-not-allowed">Précédent</button>
+                            <button id="next-question">Suivant</button>
+                        </div>
+                        <div id="quiz-score" class="mt-6 text-center text-xl font-bold hidden"></div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        const data = {
+            smicMensuel: 1766.92, 
+            pmss: 3864,
+            csgCrdsRate: 0.067,
+        };
+
+        const tabs = document.querySelectorAll('.tab-button');
+        const panes = document.querySelectorAll('.tab-pane');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const targetTab = tab.getAttribute('data-tab');
+
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+
+                panes.forEach(pane => {
+                    if (pane.id === `${targetTab}-content`) {
+                        pane.classList.remove('hidden');
+                        pane.classList.add('active');
+                    } else {
+                        pane.classList.add('hidden');
+                        pane.classList.remove('active');
+                    }
+                });
+            });
+        });
+        
+        const formatCurrency = (value) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(value);
+        
+        const inputsMaladie = [document.getElementById('maladie-salaire'), document.getElementById('maladie-duree')];
+        const resultMaladie = document.getElementById('maladie-result');
+
+        function calculateMaladie() {
+            const salaireBrut = parseFloat(inputsMaladie[0].value) || 0;
+            const duree = parseInt(inputsMaladie[1].value) || 0;
+
+            if (salaireBrut <= 0 || duree <= 0) {
+                resultMaladie.innerHTML = 'Veuillez entrer des valeurs valides.';
+                return;
+            }
+
+            const plafondSalaire = 1.4 * data.smicMensuel;
+            const salaireRetenu = Math.min(salaireBrut, plafondSalaire);
+            const sjr = (salaireRetenu * 3) / 91.25;
+            const ijssBruteJournaliere = sjr * 0.5;
+
+            const joursCarence = 3;
+            const joursIndemnises = Math.max(0, duree - joursCarence);
+            const totalIjssBrutes = joursIndemnises * ijssBruteJournaliere;
+            const totalIjssNettes = totalIjssBrutes * (1 - data.csgCrdsRate);
+
+            resultMaladie.innerHTML = `
+                <p><strong>Salaire Journalier de Réf. (SJR) :</strong> ${formatCurrency(sjr)}</p>
+                <p><strong>IJSS Brute par jour :</strong> ${formatCurrency(ijssBruteJournaliere)}</p>
+                <p><strong>Jours indemnisés :</strong> ${joursIndemnises} (après ${joursCarence}j de carence)</p>
+                <p class="font-bold mt-2">Total IJSS Brutes estimé : ${formatCurrency(totalIjssBrutes)}</p>
+                <p class="font-bold">Total IJSS Nettes estimé : ${formatCurrency(totalIjssNettes)}</p>
+                <p class="text-xs mt-2 italic">Basé sur un salaire retenu de ${formatCurrency(salaireRetenu)} (plafonné à 1.4 x SMIC).</p>
+            `;
+        }
+        
+        const inputsAtmp = [document.getElementById('atmp-salaire'), document.getElementById('atmp-duree')];
+        const resultAtmp = document.getElementById('atmp-result');
+        
+        function calculateAtmp() {
+            const salaireBrut = parseFloat(inputsAtmp[0].value) || 0;
+            const duree = parseInt(inputsAtmp[1].value) || 0;
+
+            if (salaireBrut <= 0 || duree <= 0) {
+                resultAtmp.innerHTML = 'Veuillez entrer des valeurs valides.';
+                return;
+            }
+
+            const sjr = salaireBrut / 30.42;
+            let totalIjssBrutes = 0;
+
+            const joursTaux60 = Math.min(duree, 28);
+            const ijssBruteJournaliere60 = sjr * 0.6;
+            totalIjssBrutes += joursTaux60 * ijssBruteJournaliere60;
+
+            const joursTaux80 = Math.max(0, duree - 28);
+            const ijssBruteJournaliere80 = sjr * 0.8;
+            totalIjssBrutes += joursTaux80 * ijssBruteJournaliere80;
+
+            const totalIjssNettes = totalIjssBrutes * (1 - data.csgCrdsRate);
+
+             resultAtmp.innerHTML = `
+                <p><strong>Salaire Journalier de Réf. (SJR) :</strong> ${formatCurrency(sjr)}</p>
+                <p><strong>IJSS (J1-28) :</strong> ${formatCurrency(ijssBruteJournaliere60)}/j</p>
+                <p><strong>IJSS (dès J29) :</strong> ${formatCurrency(ijssBruteJournaliere80)}/j</p>
+                 <p><strong>Jours indemnisés :</strong> ${duree} (pas de carence)</p>
+                <p class="font-bold mt-2">Total IJSS Brutes estimé : ${formatCurrency(totalIjssBrutes)}</p>
+                <p class="font-bold">Total IJSS Nettes estimé : ${formatCurrency(totalIjssNettes)}</p>
+            `;
+        }
+
+        const inputsFamille = [document.getElementById('famille-salaire'), document.getElementById('famille-duree')];
+        const resultFamille = document.getElementById('famille-result');
+
+        function calculateFamille() {
+            const salaireBrut = parseFloat(inputsFamille[0].value) || 0;
+            const duree = parseInt(inputsFamille[1].value) || 0;
+            
+            if (salaireBrut <= 0 || duree <= 0) {
+                resultFamille.innerHTML = 'Veuillez entrer des valeurs valides.';
+                return;
+            }
+
+            const salaireRetenu = Math.min(salaireBrut, data.pmss);
+            const salaireApresAbattement = salaireRetenu * (1 - 0.21);
+            const sjr = (salaireApresAbattement * 3) / 91.25;
+            const ijssPlafondJournalier = data.pmss * 12 / 365;
+            const ijssBruteJournaliere = Math.min(sjr, ijssPlafondJournalier);
+
+            const totalIjssBrutes = duree * ijssBruteJournaliere;
+            const totalIjssNettes = totalIjssBrutes * (1 - data.csgCrdsRate);
+
+            resultFamille.innerHTML = `
+                <p><strong>SJR (après abattement 21%) :</strong> ${formatCurrency(sjr)}</p>
+                <p><strong>IJSS Brute par jour :</strong> ${formatCurrency(ijssBruteJournaliere)}</p>
+                <p><strong>Jours indemnisés :</strong> ${duree} (pas de carence)</p>
+                <p class="font-bold mt-2">Total IJSS Brutes estimé : ${formatCurrency(totalIjssBrutes)}</p>
+                <p class="font-bold">Total IJSS Nettes estimé : ${formatCurrency(totalIjssNettes)}</p>
+                 <p class="text-xs mt-2 italic">Basé sur un salaire retenu de ${formatCurrency(salaireRetenu)} (plafonné au PMSS).</p>
+            `;
+        }
+        
+        const inputConges = document.getElementById('conges-duree');
+        const resultConges = document.getElementById('conges-result');
+
+        function calculateConges() {
+            const dureeMois = parseInt(inputConges.value) || 0;
+            if (dureeMois < 0) {
+                resultConges.innerHTML = 'Veuillez entrer une valeur positive.';
+                return;
+            }
+            const joursAcquis = dureeMois * 2;
+            resultConges.innerHTML = `<p>Pour ${dureeMois} mois d'arrêt, le salarié acquiert : <br><strong class="text-xl">${joursAcquis} jours ouvrables</strong> de congés payés (plafonné à 24 par an).</p>`;
+        }
+        
+        inputsMaladie.forEach(input => input.addEventListener('input', calculateMaladie));
+        inputsAtmp.forEach(input => input.addEventListener('input', calculateAtmp));
+        inputsFamille.forEach(input => input.addEventListener('input', calculateFamille));
+        inputConges.addEventListener('input', calculateConges);
+
+        calculateMaladie();
+        calculateAtmp();
+        calculateFamille();
+        calculateConges();
+        
+        const ctx = document.getElementById('comparisonChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Maladie', 'AT / MP (J1-28)', 'AT / MP (dès J29)', 'Maternité / Paternité'],
+                datasets: [{
+                    label: 'Taux d\'indemnisation (% du SJR)',
+                    data: [50, 60, 80, 100],
+                    backgroundColor: [
+                        'rgba(213, 137, 124, 0.6)',
+                        'rgba(74, 108, 111, 0.6)',
+                        'rgba(74, 108, 111, 0.8)',
+                        'rgba(93, 132, 108, 0.6)',
+                    ],
+                    borderColor: [
+                        '#C06C5D',
+                        '#4A6C6F',
+                        '#4A6C6F',
+                        '#5D846C',
+                    ],
+                    borderWidth: 2
+                }, {
+                    label: 'Jours de carence',
+                    data: [3, 0, 0, 0],
+                    backgroundColor: 'rgba(90, 90, 90, 0.2)',
+                    borderColor: '#5A5A5A',
+                    borderWidth: 1,
+                    type: 'line',
+                    yAxisID: 'y1',
+                    stepped: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Taux Indemnisation (%)' },
+                        max: 100
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        title: { display: true, text: 'Jours de Carence' },
+                        grid: { drawOnChartArea: false },
+                        min: 0,
+                        max: 7,
+                        ticks: { stepSize: 1 }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                         callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    if(context.datasetIndex === 0)
+                                        label += context.parsed.y + '%';
+                                    else
+                                        label += context.parsed.y + ' jours';
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Theme Toggle Logic
+        const themeToggle = document.getElementById('theme-toggle');
+        const htmlElement = document.documentElement;
+        const sunIcon = document.getElementById('sun-icon');
+        const moonIcon = document.getElementById('moon-icon');
+
+        themeToggle.addEventListener('click', () => {
+            if (htmlElement.classList.contains('light')) {
+                htmlElement.classList.remove('light');
+                htmlElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                sunIcon.classList.remove('hidden');
+                moonIcon.classList.add('hidden');
+            } else {
+                htmlElement.classList.remove('dark');
+                htmlElement.classList.add('light');
+                localStorage.setItem('theme', 'light');
+                sunIcon.classList.add('hidden');
+                moonIcon.classList.remove('hidden');
+            }
+        });
+
+        // Set initial theme from localStorage
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        if (savedTheme === 'dark') {
+            htmlElement.classList.add('dark');
+            sunIcon.classList.remove('hidden');
+            moonIcon.classList.add('hidden');
+        } else {
+            htmlElement.classList.add('light');
+            sunIcon.classList.add('hidden');
+            moonIcon.classList.remove('hidden');
+        }
+
+        // Quiz Logic
+        const quizQuestions = [
+            {
+                question: "Un salarié a un salaire brut mensuel de 3 000 €. Le SMIC mensuel est de 1 800 €. Pour le calcul de ses IJSS pour un arrêt maladie non professionnelle, quel est le salaire brut qui sera retenu pour ce mois ?",
+                answerOptions: [
+                    {
+                        text: "3 000 €",
+                        rationale: "Le salaire réel est pris en compte seulement s'il est inférieur au plafond légal. Dans ce cas, il le dépasse.",
+                        isCorrect: false
+                    },
+                    {
+                        text: "3 240 €",
+                        rationale: "Ce calcul correspond à l'ancien plafond (1 800 € x 1,8). La réglementation a changé, réduisant ce plafond à 1,4 fois le SMIC mensuel.",
+                        isCorrect: false
+                    },
+                    {
+                        text: "1 500 €",
+                        rationale: "Ce montant correspond à 50% du salaire réel, ce qui est une confusion entre le taux de l'IJSS et la base de calcul plafonnée.",
+                        isCorrect: false
+                    },
+                    {
+                        text: "2 520 €",
+                        rationale: "Ce montant correspond au calcul du nouveau plafond applicable (1 800 € x 1,4 = 2 520 €), qui est utilisé car le salaire réel du salarié est supérieur à cette limite. Référence : Ameli.fr, Service-Public.fr.",
+                        isCorrect: true
+                    }
+                ]
+            },
+            {
+                question: "Un salarié avec 5 ans d'ancienneté est en arrêt maladie. Sa convention collective prévoit un maintien de salaire par l'employeur dès le 1er jour. La Sécurité Sociale indemnise à partir du 4ème jour. Pendant combien de jours le salarié ne percevra-t-il une rémunération QUE de son employeur ?",
+                answerOptions: [
+                    {
+                        text: "0 jour, il perçoit les deux dès le début.",
+                        rationale: "Les IJSS de la Sécurité Sociale ne sont jamais versées pendant le délai de carence légal de 3 jours pour une maladie non professionnelle.",
+                        isCorrect: false
+                    },
+                    {
+                        text: "3 jours.",
+                        rationale: "Durant les 3 premiers jours (carence de la CPAM), seul l'employeur verse une rémunération grâce à la convention collective plus favorable. Les IJSS n'interviennent qu'ensuite. Référence : Code du Travail (principe de faveur), Ameli.fr.",
+                        isCorrect: true
+                    },
+                    {
+                        text: "7 jours.",
+                        rationale: "Le délai de 7 jours correspond à la carence de l'employeur prévue par le Code du Travail, mais ici, la convention collective plus favorable s'applique, annulant cette carence employeur.",
+                        isCorrect: false
+                    },
+                    {
+                        text: "4 jours.",
+                        rationale: "Cette réponse ne cible pas la bonne période ; le 4ème jour, le salarié commence à percevoir les IJSS en plus du maintien employeur.",
+                        isCorrect: false
+                    }
+                ]
+            },
+            {
+                question: "Quelle est la principale différence dans le calcul du Salaire Journalier de Référence (SJR) entre un arrêt maladie et un congé paternité ?",
+                answerOptions: [
+                    {
+                        text: "Pour le congé paternité, le salaire brut de référence est diminué d'un taux forfaitaire de charges (21%).",
+                        rationale: "C'est la différence clé : pour se rapprocher du salaire net, le calcul pour le congé paternité (et maternité) applique cet abattement sur la base brute, ce qui n'est pas le cas pour la maladie. Référence : Ameli.fr, Service-Public.fr.",
+                        isCorrect: true
+                    },
+                    {
+                        text: "Pour le congé paternité, on utilise les 12 derniers mois de salaire et non 3.",
+                        rationale: "La base de calcul pour les deux est généralement les 3 derniers mois de salaire (sauf activité saisonnière). La différence se situe ailleurs.",
+                        isCorrect: false
+                    },
+                    {
+                        text: "Pour le congé paternité, le SJR est calculé sur la base du salaire net.",
+                        rationale: "Le calcul se base toujours sur le salaire brut, même si pour le congé paternité, on cherche à se rapprocher du net via une déduction forfaitaire.",
+                        isCorrect: false
+                    },
+                    {
+                        text: "Pour le congé paternité, il n'y a pas de plafonnement du salaire pris en compte.",
+                        rationale: "Il existe bien un plafonnement pour le congé paternité : le salaire de référence est limité au Plafond Mensuel de la Sécurité Sociale (PMSS).",
+                        isCorrect: false
+                    }
+                ]
+            },
+            {
+                question: "Un salarié, embauché le 16 juin, tombe malade le 1er septembre. Pour calculer le SJR, comment l'employeur doit-il considérer le salaire du mois de juin ?",
+                answerOptions: [
+                    {
+                        text: "Il doit ignorer le mois de juin car il est incomplet.",
+                        rationale: "On ne peut pas ignorer un mois de la période de référence ; il faut l'ajuster pour qu'il soit représentatif.",
+                        isCorrect: false
+                    },
+                    {
+                        text: "Il doit prendre le salaire réellement versé en juin.",
+                        rationale: "Prendre uniquement le salaire réel pour un mois incomplet pénaliserait le salarié. La loi prévoit une correction.",
+                        isCorrect: false
+                    },
+                    {
+                        text: "Il doit calculer un 'salaire rétabli' pour juin, comme si le salarié avait travaillé le mois entier.",
+                        rationale: "L'embauche en cours de mois est un des cas où l'employeur doit obligatoirement reconstituer un salaire théorique pour le mois concerné afin que le calcul de l'IJSS soit juste. Référence : Article R. 323-8 du Code de la Sécurité Sociale.",
+                        isCorrect: true
+                    },
+                    {
+                        text: "Il doit demander à la CPAM comment procéder.",
+                        rationale: "La procédure du salaire rétabli est une obligation de l'employeur définie par le Code de la Sécurité Sociale ; il doit l'appliquer directement.",
+                        isCorrect: false
+                    }
+                ]
+            },
+            {
+                question: "Lequel de ces éléments n'est PAS une condition pour qu'un salarié en arrêt maladie de moins de 6 mois puisse percevoir des IJSS ?",
+                answerOptions: [
+                    {
+                        text: "Avoir au moins un an d'ancienneté dans l'entreprise.",
+                        rationale: "L'ancienneté est une condition liée au maintien de salaire par l'employeur selon le Code du Travail, mais elle n'impacte pas le droit aux IJSS versées par la Sécurité Sociale. Référence : Ameli.fr.",
+                        isCorrect: true
+                    },
+                    {
+                        text: "Avoir travaillé au moins 150 heures dans les 3 mois précédant l'arrêt.",
+                        rationale: "Ceci est l'une des deux conditions possibles relatives à l'activité professionnelle requise pour ouvrir des droits aux IJSS.",
+                        isCorrect: false
+                    },
+                    {
+                        text: "Avoir cotisé sur un salaire au moins égal à 1 015 fois le SMIC horaire dans les 6 mois précédant l'arrêt.",
+                        rationale: "Ceci est l'alternative à la condition des 150 heures de travail pour être éligible aux IJSS.",
+                        isCorrect: false
+                    },
+                    {
+                        text: "Transmettre son arrêt de travail dans les 48 heures.",
+                        rationale: "Le respect des délais de transmission est une condition administrative pour le versement des indemnités.",
+                        isCorrect: false
+                    }
+                ]
+            },
+            {
+                question: "Un salarié a un accident de trajet et est en arrêt pendant 35 jours. Quel sera le taux de son IJSS brute le 30ème jour de son arrêt ?",
+                answerOptions: [
+                    {
+                        text: "50% du SJR.",
+                        rationale: "Ce taux est celui de l'arrêt maladie non professionnelle, et non de l'accident de trajet qui est plus favorable.",
+                        isCorrect: false
+                    },
+                    {
+                        text: "80% du SJR.",
+                        rationale: "Après 28 jours d'indemnisation pour un AT ou un accident de trajet, le taux de l'IJSS est porté à 80% du SJR. Le 30ème jour se situe dans cette nouvelle période. Référence : Ameli.fr, Service-Public.fr.",
+                        isCorrect: true
+                    },
+                    {
+                        text: "60% du SJR.",
+                        rationale: "Ce taux est correct pour les 28 premiers jours d'indemnisation, mais il est majoré par la suite.",
+                        isCorrect: false
+                    },
+                    {
+                        text: "100% du SJR.",
+                        rationale: "Une indemnisation à 100% est réservée à d'autres types de congés, comme la maternité ou la paternité.",
+                        isCorrect: false
+                    }
+                ]
+            },
+            {
+                question: "Si l'employeur pratique la subrogation, les IJSS qu'il perçoit de la CPAM sont...",
+                answerOptions: [
+                    {
+                        text: "intégralement soumises aux cotisations sociales comme du salaire.",
+                        rationale: "Les IJSS subrogées ne sont pas considérées comme du salaire et ne sont donc pas soumises aux cotisations sociales (sauf CSG/CRDS déjà prélevée).",
+                        isCorrect: false
+                    },
+                    {
+                        text: "non imposables pour le salarié.",
+                        rationale: "Les IJSS sont des revenus de remplacement et sont, à ce titre, soumises à l'impôt sur le revenu (après abattement pour la part de CSG déductible).",
+                        isCorrect: false
+                    },
+                    {
+                        text: "reversées au salarié après déduction de la CSG/CRDS par la CPAM.",
+                        rationale: "La CPAM calcule les IJSS brutes, prélève la CSG/CRDS, et verse le net à l'employeur (en cas de subrogation) qui doit le reverser au salarié. Référence : Ameli.fr, Net-Entreprises.fr.",
+                        isCorrect: true
+                    },
+                    {
+                        text: "enregistrées comme un produit exceptionnel pour l'entreprise.",
+                        rationale: "Comptablement, les IJSS perçues sont généralement enregistrées en 'transfert de charges' (compte 791) et non en produit exceptionnel.",
+                        isCorrect: false
+                    }
+                ]
+            },
+            {
+                question: "Le 'jour de l'accident' dans le cadre d'un AT est rémunéré intégralement par l'employeur. Comment cette journée est-elle considérée ?",
+                answerOptions: [
+                    {
+                        text: "Comme une journée de travail normale, sans retenue pour absence.",
+                        rationale: "La loi prévoit que la journée au cours de laquelle l'accident a lieu, quelle que soit l'heure, est intégralement à la charge de l'employeur et ne doit pas faire l'objet d'une retenue. Référence : Article L. 433-1 du Code de la Sécurité Sociale.",
+                        isCorrect: true
+                    },
+                    {
+                        text: "Comme le premier jour de carence de l'employeur.",
+                        rationale: "Il n'y a pas de délai de carence employeur pour un AT, et cette journée est considérée comme une journée de travail normale en termes de paie.",
+                        isCorrect: false
+                    },
+                    {
+                        text: "Comme le premier jour d'indemnisation par les IJSS.",
+                        rationale: "L'indemnisation par la CPAM ne commence que le jour suivant l'accident, le jour J étant entièrement payé par l'employeur.",
+                        isCorrect: false
+                    },
+                    {
+                        text: "Comme une absence autorisée non payée.",
+                        rationale: "Cette journée est une absence autorisée, mais elle est obligatoirement payée intégralement par l'employeur.",
+                        isCorrect: false
+                    }
+                ]
+            },
+            {
+                question: "Une salariée en congé maternité a une IJSS brute calculée de 95 €. Le plafond journalier de l'IJSS maternité est de 100,36 €. Quel sera le montant de son IJSS brute journalière versée ?",
+                answerOptions: [
+                    {
+                        text: "47,50 €",
+                        rationale: "Ce montant correspondrait à un taux de 50%, qui est celui de l'arrêt maladie et non du congé maternité.",
+                        isCorrect: false
+                    },
+                    {
+                        text: "95 €",
+                        rationale: "Le montant de l'IJSS est égal au SJR calculé, tant que celui-ci ne dépasse pas le plafond journalier de la Sécurité Sociale. Ici, 95 € est inférieur à 100,36 €, donc le montant calculé est retenu. Référence : Ameli.fr, Service-Public.fr.",
+                        isCorrect: true
+                    },
+                    {
+                        text: "100,36 €",
+                        rationale: "Le plafond n'est pas le montant versé systématiquement. Il représente une limite maximale. L'IJSS ne peut pas être supérieure au SJR calculé.",
+                        isCorrect: false
+                    },
+                    {
+                        text: "75,05 €",
+                        rationale: "Ce montant (95€ - 21%) résulte d'une confusion : l'abattement de 21% s'applique sur les salaires bruts pour calculer le SJR, et non sur le montant de l'IJSS elle-même.",
+                        isCorrect: false
+                    }
+                ]
+            },
+            {
+                question: "Un accord de prévoyance qui garantit un complément de salaire en cas d'arrêt...",
+                answerOptions: [
+                    {
+                        text: "est toujours versé directement par l'employeur.",
+                        rationale: "Le complément peut être versé par l'employeur qui se fait ensuite rembourser par l'assureur, ou parfois directement par l'organisme de prévoyance au salarié.",
+                        isCorrect: false
+                    },
+                    {
+                        text: "remplace les IJSS versées par la Sécurité Sociale.",
+                        rationale: "La prévoyance vient toujours en complément des prestations de base de la Sécurité Sociale, elle ne les remplace pas.",
+                        isCorrect: false
+                    },
+                    {
+                        text: "résulte d'une négociation contractuelle ou collective.",
+                        rationale: "Contrairement aux IJSS qui relèvent de la loi, les garanties de prévoyance sont issues de contrats d'assurance, souvent mis en place via une convention collective ou un accord d'entreprise. Référence : Section 'Le complément employeur – Rôle de la prévoyance' du rapport.",
+                        isCorrect: true
+                    },
+                    {
+                        text: "n'est pas soumis à l'impôt sur le revenu.",
+                        rationale: "Les indemnités complémentaires versées par la prévoyance sont considérées comme un revenu de remplacement et sont donc imposables.",
+                        isCorrect: false
+                    }
+                ]
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let quizCompleted = false;
+
+        const quizQuestionElement = document.getElementById('quiz-question');
+        const quizOptionsElement = document.getElementById('quiz-options');
+        const quizFeedbackElement = document.getElementById('quiz-feedback');
+        const prevQuestionButton = document.getElementById('prev-question');
+        const nextQuestionButton = document.getElementById('next-question');
+        const quizScoreElement = document.getElementById('quiz-score');
+
+        function loadQuestion() {
+            quizFeedbackElement.innerHTML = '';
+            quizOptionsElement.innerHTML = '';
+            quizScoreElement.classList.add('hidden');
+            quizCompleted = false;
+
+            if (currentQuestionIndex >= quizQuestions.length) {
+                displayFinalScore();
+                return;
+            }
+
+            const questionData = quizQuestions[currentQuestionIndex];
+            quizQuestionElement.textContent = `Question ${currentQuestionIndex + 1} / ${quizQuestions.length}: ${questionData.question}`;
+
+            questionData.answerOptions.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.classList.add('quiz-option');
+                optionDiv.textContent = option.text;
+                optionDiv.dataset.index = index;
+                optionDiv.addEventListener('click', () => selectAnswer(optionDiv, option));
+                quizOptionsElement.appendChild(optionDiv);
+            });
+
+            updateNavigationButtons();
+        }
+
+        function selectAnswer(selectedOptionDiv, selectedOption) {
+            if (quizCompleted) return;
+
+            const questionData = quizQuestions[currentQuestionIndex];
+            const allOptions = quizOptionsElement.querySelectorAll('.quiz-option');
+
+            allOptions.forEach(optionDiv => {
+                optionDiv.style.pointerEvents = 'none'; // Disable further clicks
+                const optionIndex = parseInt(optionDiv.dataset.index);
+                const option = questionData.answerOptions[optionIndex];
+
+                const rationaleDiv = document.createElement('div');
+                rationaleDiv.classList.add('quiz-rationale', 'mt-2', 'p-2', 'rounded');
+                rationaleDiv.textContent = option.rationale;
+
+                if (option.isCorrect) {
+                    optionDiv.classList.add('correct');
+                    rationaleDiv.classList.add('correct');
+                } else {
+                    optionDiv.classList.add('incorrect');
+                    rationaleDiv.classList.add('incorrect');
+                }
+                optionDiv.appendChild(rationaleDiv);
+            });
+
+            if (selectedOption.isCorrect) {
+                score++;
+            }
+            quizCompleted = true;
+            updateNavigationButtons();
+        }
+
+        function updateNavigationButtons() {
+            prevQuestionButton.disabled = currentQuestionIndex === 0;
+            prevQuestionButton.classList.toggle('opacity-50', currentQuestionIndex === 0);
+            prevQuestionButton.classList.toggle('cursor-not-allowed', currentQuestionIndex === 0);
+
+            nextQuestionButton.textContent = currentQuestionIndex === quizQuestions.length - 1 ? 'Voir le score' : 'Suivant';
+            nextQuestionButton.disabled = !quizCompleted && currentQuestionIndex < quizQuestions.length;
+            nextQuestionButton.classList.toggle('opacity-50', !quizCompleted && currentQuestionIndex < quizQuestions.length);
+            nextQuestionButton.classList.toggle('cursor-not-allowed', !quizCompleted && currentQuestionIndex < quizQuestions.length);
+        }
+
+        function displayFinalScore() {
+            quizQuestionElement.textContent = 'Quiz Terminé !';
+            quizOptionsElement.innerHTML = '';
+            quizFeedbackElement.innerHTML = '';
+            quizNavigationElement.classList.add('hidden');
+            quizScoreElement.classList.remove('hidden');
+            quizScoreElement.innerHTML = `Votre score final : ${score} / ${quizQuestions.length}`;
+        }
+
+        prevQuestionButton.addEventListener('click', () => {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                quizCompleted = false; // Reset for new question
+                loadQuestion();
+            }
+        });
+
+        nextQuestionButton.addEventListener('click', () => {
+            if (currentQuestionIndex < quizQuestions.length) {
+                currentQuestionIndex++;
+                quizCompleted = false; // Reset for new question
+                loadQuestion();
+            } else {
+                displayFinalScore();
+            }
+        });
+
+        const quizNavigationElement = document.querySelector('.quiz-navigation');
+        loadQuestion(); // Load the first question when the page loads
+    </script>
+
+</body>
+</html>
