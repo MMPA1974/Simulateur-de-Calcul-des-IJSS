@@ -652,7 +652,7 @@
             plugins: {
                 legend: {
                     labels: {
-                        color: currentFontColor,
+                        color: null, // Sera défini par updateChartColorsForTheme
                         font: { size: 14 }
                     }
                 },
@@ -664,12 +664,12 @@
             },
             scales: {
                 x: {
-                    ticks: { color: currentFontColor, font: { size: 12 } },
-                    grid: { color: currentGridColor }
+                    ticks: { color: null, font: { size: 12 } }, // Sera défini par updateChartColorsForTheme
+                    grid: { color: null } // Sera défini par updateChartColorsForTheme
                 },
                 y: {
-                    ticks: { color: currentFontColor, font: { size: 12 } },
-                    grid: { color: currentGridColor },
+                    ticks: { color: null, font: { size: 12 } }, // Sera défini par updateChartColorsForTheme
+                    grid: { color: null }, // Sera défini par updateChartColorsForTheme
                     beginAtZero: true
                 }
             }
@@ -683,17 +683,19 @@
             const canvas = document.getElementById(canvasId);
             if (!canvas) {
                 console.warn(`Canvas with ID '${canvasId}' not found. Skipping chart initialization.`);
-                return;
+                return null; // Retourne null si le canvas n'est pas trouvé
             }
             const ctx = canvas.getContext('2d');
             if (chartInstances[canvasId]) {
                 chartInstances[canvasId].destroy(); // Détruit l'ancienne instance si elle existe
             }
-            chartInstances[canvasId] = new Chart(ctx, {
+            const newChart = new Chart(ctx, {
                 type: chartType,
                 data: chartData,
                 options: chartOptions
             });
+            chartInstances[canvasId] = newChart;
+            return newChart;
         }
 
         // Données pour le graphique CSG/CRDS
@@ -744,49 +746,76 @@
             }]
         };
 
-        // Initialisation des graphiques au chargement de la page
-        document.addEventListener('DOMContentLoaded', () => {
-            // Initialisation des calculs des simulateurs
-            calculateMaladie();
-            calculateAtmp();
-            calculateFamille();
-            calculateConges();
+        // Fonction pour mettre à jour les couleurs des graphiques en fonction du thème
+        function updateChartColorsForTheme(isDarkMode) {
+            currentFontColor = isDarkMode ? FONT_COLOR_DARK : FONT_COLOR_LIGHT;
+            currentGridColor = isDarkMode ? GRID_COLOR_DARK : GRID_COLOR_LIGHT;
 
-            // Initialisation des graphiques (appelée une fois au début)
-            initializeChartInstance('csgChart', 'doughnut', csgData, {
-                responsive: true,
-                maintainAspectRatio: false,
+            // Mettre à jour les options par défaut de Chart.js pour les nouvelles instances
+            Chart.defaults.color = currentFontColor;
+            Chart.defaults.borderColor = currentGridColor;
+
+            // Options spécifiques pour le graphique de comparaison (avec y1 axis)
+            const comparisonChartOptions = { ...defaultChartOptions,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Taux Indemnisation (%)', color: currentFontColor },
+                        max: 100,
+                        ticks: { color: currentFontColor },
+                        grid: { color: currentGridColor }
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        title: { display: true, text: 'Jours de Carence', color: currentFontColor },
+                        grid: { drawOnChartArea: false, color: currentGridColor },
+                        min: 0,
+                        max: 7,
+                        ticks: { stepSize: 1, color: currentFontColor }
+                    },
+                    x: {
+                        ticks: { color: currentFontColor },
+                        grid: { color: currentGridColor }
+                    }
+                },
                 plugins: {
                     legend: {
-                        position: 'bottom',
                         labels: {
                             color: currentFontColor,
-                            font: { size: 12 }
+                            font: { size: 14 }
                         }
                     },
                     tooltip: {
                         callbacks: {
-                            title: tooltipTitleCallback
+                            title: tooltipTitleCallback,
+                            label: function(context) { // Spécifique pour ce graphique
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    if(context.datasetIndex === 0)
+                                        label += context.parsed.y + '%';
+                                    else
+                                        label += context.parsed.y + ' jours';
+                                }
+                                return label;
+                            }
                         }
                     }
                 }
-            });
+            };
 
-            // Initialisation du graphique de comparaison (il est dans un onglet, donc peut être null si l'onglet n'est pas actif)
-            // Il sera réinitialisé par updateChartColorsForTheme quand l'onglet sera actif.
-            // Pour le moment, on ne l'initialise pas ici, car il est dans un onglet caché par défaut.
-            // Il sera créé lors de l'activation de son onglet.
-            
-            // Applique le thème initial et initialise les couleurs des graphiques
-            const savedTheme = localStorage.getItem('theme');
-            if (savedTheme) {
-                applyTheme(savedTheme);
-            } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                applyTheme('dark');
-            } else {
-                applyTheme('light');
+            // Recréer les graphiques avec les nouvelles couleurs
+            initializeChartInstance('csgChart', 'doughnut', csgData, defaultChartOptions);
+            // Le graphique de comparaison est dans un onglet, il sera initialisé/mis à jour lors de l'activation de l'onglet
+            const comparisonCanvas = document.getElementById('comparisonChart');
+            if (comparisonCanvas && !comparisonCanvas.closest('.tab-pane').classList.contains('hidden')) {
+                initializeChartInstance('comparisonChart', 'bar', rateComparisonData, comparisonChartOptions);
             }
-        });
+        }
 
         // Logique de bascule du thème (clair/sombre)
         const themeToggle = document.getElementById('theme-toggle');
@@ -813,90 +842,14 @@
             applyTheme(newTheme);
         });
 
-        // Met à jour les couleurs des graphiques lors du changement de thème
-        function updateChartColorsForTheme(isDarkMode) {
-            currentFontColor = isDarkMode ? FONT_COLOR_DARK : FONT_COLOR_LIGHT;
-            currentGridColor = isDarkMode ? GRID_COLOR_DARK : GRID_COLOR_LIGHT;
-
-            // Met à jour les options globales de Chart.js
-            Chart.defaults.color = currentFontColor;
-            Chart.defaults.borderColor = currentGridColor;
-
-            // Met à jour et recrée les graphiques existants avec les nouvelles couleurs
-            // Graphique CSG/CRDS (toujours visible)
-            initializeChartInstance('csgChart', 'doughnut', csgData, {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            color: currentFontColor,
-                            font: { size: 12 }
-                        }
-                    },
-                    tooltip: {
-                        callbacks: {
-                            title: tooltipTitleCallback
-                        }
-                    }
-                }
-            });
-
-            // Graphique de comparaison (créé/mis à jour seulement si son onglet est actif)
-            const comparisonTab = document.getElementById('comparaison-content');
-            if (!comparisonTab.classList.contains('hidden')) {
-                initializeChartInstance('comparisonChart', 'bar', rateComparisonData, {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            title: { display: true, text: 'Taux Indemnisation (%)', color: currentFontColor },
-                            max: 100,
-                            ticks: { color: currentFontColor }
-                        },
-                        y1: {
-                            type: 'linear',
-                            display: true,
-                            position: 'right',
-                            title: { display: true, text: 'Jours de Carence', color: currentFontColor },
-                            grid: { drawOnChartArea: false },
-                            min: 0,
-                            max: 7,
-                            ticks: { stepSize: 1, color: currentFontColor }
-                        },
-                        x: {
-                            ticks: { color: currentFontColor },
-                            grid: { color: currentGridColor }
-                        }
-                    },
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    if (label) {
-                                        label += ': ';
-                                    }
-                                    if (context.parsed.y !== null) {
-                                        if(context.datasetIndex === 0)
-                                            label += context.parsed.y + '%';
-                                        else
-                                            label += context.parsed.y + ' jours';
-                                    }
-                                    return label;
-                                }
-                            }
-                        },
-                        legend: {
-                            labels: {
-                                color: currentFontColor
-                            }
-                        }
-                    }
-                });
-            }
+        // Set initial theme from localStorage or system preference
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            applyTheme(savedTheme);
+        } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            applyTheme('dark');
+        } else {
+            applyTheme('light');
         }
 
 
@@ -1318,16 +1271,6 @@
         const quizNavigationElement = document.querySelector('.quiz-navigation');
         loadQuestion(); // Load the first question when the page loads
 
-        // Initialisation des calculs des simulateurs au chargement
-        calculateMaladie();
-        calculateAtmp();
-        calculateFamille();
-        calculateConges();
-
-        // Initialisation des graphiques (appelée une fois au début)
-        // La fonction applyTheme gère déjà l'initialisation et la mise à jour des couleurs.
-        // On s'assure que les graphiques sont créés ou mis à jour au moment où le thème est appliqué.
-        // La fonction initializeChartInstance est appelée dans updateChartColorsForTheme.
     </script>
 
 </body>
